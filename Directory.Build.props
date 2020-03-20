@@ -4,8 +4,8 @@
 
   <!-- Settings used by the common settings. -->
   <PropertyGroup>
-    <PackageCopyrightYears>2016-2020</PackageCopyrightYears>
-    <PackageRepositoryName>MusicBrainz</PackageRepositoryName>
+    <PackageCopyrightYears>2020</PackageCopyrightYears>
+    <PackageRepositoryName>MetaBrainz.Common.Json</PackageRepositoryName>
   </PropertyGroup>
 
   <!-- Get common settings. -->
