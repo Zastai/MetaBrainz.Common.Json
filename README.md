@@ -1,4 +1,4 @@
-# MetaBrainz.Common.Json [![Build Status](https://ci.appveyor.com/api/projects/status/m7n8i89qykbha2qk?svg=true)](https://ci.appveyor.com/project/Zastai/metabrainz-common-json) [![NuGet Version](https://badge.fury.io/nu/MetaBrainz.Common.Json.svg)](https://badge.fury.io/nu/MetaBrainz.Common.Json)
+# MetaBrainz.Common.Json  [![Build Status](https://img.shields.io/appveyor/build/zastai/metabrainz-common-json)](https://ci.appveyor.com/project/Zastai/metabrainz-common-json) [![NuGet Version](https://img.shields.io/nuget/v/MetaBrainz.Common.Json)](https://www.nuget.org/packages/MetaBrainz.Common.Json)
 
 JSON-related helper classes, for use by the other `MetaBrainz.*` packages.
 
