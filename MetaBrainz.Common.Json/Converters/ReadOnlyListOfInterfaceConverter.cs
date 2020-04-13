@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using JetBrains.Annotations;
+
 namespace MetaBrainz.Common.Json.Converters {
 
   /// <summary>
@@ -14,7 +16,10 @@ namespace MetaBrainz.Common.Json.Converters {
   /// The interface (or base class) type stored in the read-only list type of the property being converted to/from JSON.
   /// </typeparam>
   /// <typeparam name="TObject">The specific implementation type to use for the actual backing list.</typeparam>
-  public sealed class ReadOnlyListOfInterfaceConverter<TInterface, TObject> : JsonConverter<IReadOnlyList<TInterface>?> where TInterface : class where TObject : class, TInterface {
+  [PublicAPI]
+  public sealed class ReadOnlyListOfInterfaceConverter<TInterface, TObject> : JsonConverter<IReadOnlyList<TInterface>?>
+    where TInterface : class
+    where TObject : class, TInterface {
 
     /// <inheritdoc />
     public override IReadOnlyList<TInterface>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {

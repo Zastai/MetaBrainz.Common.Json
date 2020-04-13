@@ -2,9 +2,12 @@ using System;
 using System.Text;
 using System.Text.Json;
 
+using JetBrains.Annotations;
+
 namespace MetaBrainz.Common.Json {
 
   /// <summary>Utility class, providing various methods to ease the use of System.Text.Json.</summary>
+  [PublicAPI]
   public static class JsonUtils {
 
     private static readonly JsonSerializerOptions Options = new JsonSerializerOptions {
