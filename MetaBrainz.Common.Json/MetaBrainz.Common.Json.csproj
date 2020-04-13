@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Title>Common JSON Utilities</Title>
     <Description>This package provides JSON-related utility classes used by other MetaBrainz packages.</Description>
     <PackageTags>MetaBrainz JSON</PackageTags>
-    <Version>1.0.1-pre</Version>
+    <Version>1.1.0-pre</Version>
   </PropertyGroup>
 
   <PropertyGroup>
