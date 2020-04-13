@@ -17,4 +17,20 @@
     <PackageReference Include="System.Text.Json" Version="4.7.1" />
   </ItemGroup>
 
+  <Target Name="AdjustPackageVersionForAppVeyor"
+          Condition=" '$(APPVEYOR_BUILD_NUMBER)' != '' And '$(APPVEYOR_BUILD_NUMBER)' != '' "
+          BeforeTargets="GenerateNuSpec"
+          DependsOnTargets="ParseVersionSpecification;SetPackagePropertiesFromVersion">
+    <PropertyGroup>
+      <PackageVersion>$(_Version_Full)-appveyor.$(APPVEYOR_BUILD_NUMBER)</PackageVersion>
+      <PackageVersion Condition=" '$(PackageBuildIdentifier)' != '' ">$(PackageVersion)+$(PackageBuildIdentifier)</PackageVersion>
+    </PropertyGroup>
+    <!-- Debug Output -->
+    <Message Importance="High" Text="Adjusted Package Version For AppVeyor Feed:"/>
+    <Message Importance="High" Text="- AppVeyor Build ID     : $(APPVEYOR_BUILD_ID)"/>
+    <Message Importance="High" Text="- AppVeyor Build Number : $(APPVEYOR_BUILD_NUMBER)"/>
+    <Message Importance="High" Text="- AppVeyor Build Version: $(APPVEYOR_BUILD_VERSION)"/>
+    <Message Importance="High" Text="- PackageVersion        : $(PackageVersion)"/>
+  </Target>
+
 </Project>
