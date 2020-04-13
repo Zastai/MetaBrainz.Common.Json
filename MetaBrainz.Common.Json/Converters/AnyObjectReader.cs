@@ -8,7 +8,11 @@ namespace MetaBrainz.Common.Json.Converters {
 
   /// <summary>A JSON reader that handles fields of type <see cref="object"/> using the most appropriate framework type.</summary>
   [PublicAPI]
-  public class AnyObjectReader : JsonReader<object?> {
+  public sealed class AnyObjectReader : JsonReader<object?> {
+
+    /// <summary>A global instance, for easy use without unnecessary object allocation.</summary>
+    /// <remarks>This reader is stateless, so this single instance can be used everywhere.</remarks>
+    public static readonly AnyObjectReader Instance = new AnyObjectReader();
 
     /// <summary>Reads and converts JSON to the most appropriate .NET framework type.</summary>
     /// <param name="reader">The reader to read from.</param>
