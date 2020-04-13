@@ -11,7 +11,11 @@ namespace MetaBrainz.Common.Json.Converters {
   /// Converter that handles fields of type <see cref="object"/> using the most appropriate framework type.
   /// Only JSON object values will use <see cref="JsonElement"/> as a fallback.
   /// </summary>
+  /// <remarks>
+  /// This class has been superseded by <see cref="AnyObjectReader"/> and will be removed in a future version of the library.
+  /// </remarks>
   [PublicAPI]
+  [Obsolete("Use AnyObjectReader instead.")]
   public sealed class AnyObjectConverter : JsonConverter<object?> {
 
     /// <inheritdoc />
