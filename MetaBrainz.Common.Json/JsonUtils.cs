@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 using JetBrains.Annotations;
 
@@ -175,6 +176,39 @@ namespace MetaBrainz.Common.Json {
       return size.HasValue
         ? JsonUtils.ReadList<TList, TElement>(size.Value, ref reader, options)
         : JsonUtils.ReadList<TList, TElement>(ref reader, options);
+    }
+
+    /// <summary>Writes a list of values of type <typeparamref name="T"/> as JSON.</summary>
+    /// <param name="writer">The writer to write to.</param>
+    /// <param name="values">The values to write.</param>
+    /// <param name="options">The options to use for serialization.</param>
+    /// <typeparam name="T">The element type for the list.</typeparam>
+    public static void WriteList<T>(Utf8JsonWriter writer, IEnumerable<T> values, JsonSerializerOptions options) {
+      if (values == null) {
+        writer.WriteNullValue();
+        return;
+      }
+      writer.WriteStartArray();
+      foreach (var value in values)
+        JsonSerializer.Serialize(writer, value, options);
+      writer.WriteEndArray();
+    }
+
+    /// <summary>Writes a list of values of type <typeparamref name="T"/> as JSON.</summary>
+    /// <param name="writer">The writer to write to.</param>
+    /// <param name="values">The values to write.</param>
+    /// <param name="options">The options to use for serialization.</param>
+    /// <returns>A task that performs the writes.</returns>
+    /// <typeparam name="T">The element type for the list.</typeparam>
+    public static async Task WriteListAsync<T>(Utf8JsonWriter writer, IAsyncEnumerable<T> values, JsonSerializerOptions options) {
+      if (values == null) {
+        writer.WriteNullValue();
+        return;
+      }
+      writer.WriteStartArray();
+      await foreach (var value in values)
+        JsonSerializer.Serialize(writer, value, options);
+      writer.WriteEndArray();
     }
 
   }
