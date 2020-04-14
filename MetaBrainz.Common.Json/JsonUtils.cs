@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 using JetBrains.Annotations;
@@ -194,6 +195,24 @@ namespace MetaBrainz.Common.Json {
       writer.WriteEndArray();
     }
 
+    /// <summary>Writes a list of values of type <typeparamref name="TList"/> as JSON.</summary>
+    /// <param name="writer">The writer to write to.</param>
+    /// <param name="values">The values to write.</param>
+    /// <param name="options">The options to use for serialization.</param>
+    /// <param name="converter">The specific converter to use for serialization.</param>
+    /// <typeparam name="TList">The element type for the list.</typeparam>
+    /// <typeparam name="TConverter">The specific type used by the converter.</typeparam>
+    public static void WriteList<TList,TConverter>(Utf8JsonWriter writer, IEnumerable<TList> values, JsonSerializerOptions options, JsonConverter<TConverter> converter) where TList : TConverter {
+      if (values == null) {
+        writer.WriteNullValue();
+        return;
+      }
+      writer.WriteStartArray();
+      foreach (var value in values)
+        converter.Write(writer, value, options);
+      writer.WriteEndArray();
+    }
+
     /// <summary>Writes a list of values of type <typeparamref name="T"/> as JSON.</summary>
     /// <param name="writer">The writer to write to.</param>
     /// <param name="values">The values to write.</param>
@@ -208,6 +227,25 @@ namespace MetaBrainz.Common.Json {
       writer.WriteStartArray();
       await foreach (var value in values)
         JsonSerializer.Serialize(writer, value, options);
+      writer.WriteEndArray();
+    }
+
+    /// <summary>Writes a list of values of type <typeparamref name="TList"/> as JSON.</summary>
+    /// <param name="writer">The writer to write to.</param>
+    /// <param name="values">The values to write.</param>
+    /// <param name="options">The options to use for serialization.</param>
+    /// <param name="converter">The specific converter to use for serialization.</param>
+    /// <returns>A task that performs the writes.</returns>
+    /// <typeparam name="TList">The element type for the list.</typeparam>
+    /// <typeparam name="TConverter">The specific type used by the converter.</typeparam>
+    public static async Task WriteListAsync<TList, TConverter>(Utf8JsonWriter writer, IAsyncEnumerable<TList> values, JsonSerializerOptions options, JsonConverter<TConverter> converter) where TList : TConverter {
+      if (values == null) {
+        writer.WriteNullValue();
+        return;
+      }
+      writer.WriteStartArray();
+      await foreach (var value in values)
+        converter.Write(writer, value, options);
       writer.WriteEndArray();
     }
 
