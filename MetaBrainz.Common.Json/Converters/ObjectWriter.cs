@@ -11,9 +11,9 @@ namespace MetaBrainz.Common.Json.Converters {
 
     /// <summary>Write an object as JSON.</summary>
     /// <param name="writer">The writer to write to.</param>
-    /// <param name="value">The value to write the contents of.</param>
+    /// <param name="value">The value to write.</param>
     /// <param name="options">The options to use for serialization.</param>
-    public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options) {
+    public sealed override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options) {
       if (value == null) { // Will never be the case for normal JsonSerializer processing, but handle it anyway.
         writer.WriteNullValue();
         return;
