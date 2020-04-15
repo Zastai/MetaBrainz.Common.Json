@@ -27,15 +27,15 @@ namespace MetaBrainz.Common.Json.Converters {
     /// </listheader>
     /// <item>
     /// <term><c>null</c></term>
-    /// <description><see cref="object"/> (<see langword="null"/>)</description>
+    /// <description><see cref="object"/> (<see langword="null"/>).</description>
     /// </item>
     /// <item>
     /// <term><c>true</c></term>
-    /// <description><see cref="bool"/> (<see langword="true"/>)</description>
+    /// <description><see cref="bool"/> (<see langword="true"/>).</description>
     /// </item>
     /// <item>
     /// <term><c>false</c></term>
-    /// <description><see cref="bool"/> (<see langword="false"/>)</description>
+    /// <description><see cref="bool"/> (<see langword="false"/>).</description>
     /// </item>
     /// <item>
     /// <term>a string</term>
@@ -68,7 +68,7 @@ namespace MetaBrainz.Common.Json.Converters {
     /// <item>
     /// <term>an object</term>
     /// <description>
-    /// <see cref="Dictionary{TKey,TValue}"/> with <see cref="string"/> as key and <see cref="object"/> as value
+    /// <see cref="Dictionary{TKey,TValue}"/>, with <see cref="string"/> as key and (nullable) <see cref="object"/> as value.
     /// </description>
     /// </item>
     /// </list>
