@@ -4,6 +4,10 @@ JSON-related helper classes, for use by the other `MetaBrainz.*` packages.
 
 ## Release Notes
 
+### v1.1.1 (2020-04-16)
+
+This version fixes a build issue causing the XML documentation to be missing from the NuGet package.
+
 ### v1.1.0 (2020-04-15)
 
 #### API Changes
