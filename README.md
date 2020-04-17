@@ -4,9 +4,24 @@ JSON-related helper classes, for use by the other `MetaBrainz.*` packages.
 
 ## Release Notes
 
+### v1.2.0 (_work in progress_)
+
+#### API Changes
+
+#### API Additions
+
+- New Extension Method: `JsonUtils.GetUri()`
+- New Extension Method: `JsonUtils.TryGetUri()`
+
+#### Other Changes
+
+#### Dependency Updates
+
+
 ### v1.1.1 (2020-04-16)
 
 This version fixes a build issue causing the XML documentation to be missing from the NuGet package.
+
 
 ### v1.1.0 (2020-04-15)
 
@@ -43,7 +58,7 @@ This version fixes a build issue causing the XML documentation to be missing fro
 - tweaks and updates to the build system
 - marked more types as `[PublicAPI]` (dev-time change only)
 
-#### Dependency Updates:
+#### Dependency Updates
 
 - JetBrainz.Annotations → 2020.1.0
 - System.Text.Json → 4.7.1

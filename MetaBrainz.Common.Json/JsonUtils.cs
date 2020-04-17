@@ -62,9 +62,25 @@ namespace MetaBrainz.Common.Json {
       return value;
     }
 
+    /// <summary>
+    /// Takes the next JSON token value from the specified reader and parses it as an absolute <see cref="Uri">URI</see>.
+    /// </summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>The URI, if the entire UTF-8 encoded token value was successfully parsed.</returns>
+    /// <exception cref="JsonException">
+    /// When the current JSON token value is not a string, or could not be parsed as an absolute <see cref="Uri">URI</see>.
+    /// </exception>
+    public static Uri GetUri(this ref Utf8JsonReader reader) {
+      if (reader.TryGetUri(out var uri))
+        return uri ?? throw new JsonException("Expected a URI but received null.");
+      throw new JsonException($"Expected a URI but received a JSON token of type '{reader.TokenType}' ({reader.GetRawStringValue()}).");
+    }
+
     /// <summary>Pretty-prints a JSON string.</summary>
     /// <param name="json">The JSON string to pretty-print.</param>
-    /// <returns>An indented version of <paramref name="json"/>.</returns>
+    /// <returns>
+    /// An indented version of <paramref name="json"/>. If anything goes wrong, <paramref name="json"/> is returned unchanged.
+    /// </returns>
     public static string Prettify(string json) {
       try {
         return JsonSerializer.Serialize(JsonDocument.Parse(json).RootElement, JsonUtils.Options);
@@ -149,6 +165,19 @@ namespace MetaBrainz.Common.Json {
       }
       return elements;
     }
+
+    /// <summary>
+    /// Tries to parse the given reader's current JSON token value as an absolute <see cref="Uri">URI</see> and returns a value that
+    /// indicates whether the operation succeeded.
+    /// </summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="value">When this method returns, contains the parsed value.</param>
+    /// <returns>
+    /// <see langword="true"/> if the entire UTF-8 encoded token value can be successfully parsed as an absolute
+    /// <see cref="Uri">URI</see>; otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool TryGetUri(this ref Utf8JsonReader reader, out Uri? value)
+      => Uri.TryCreate(reader.GetString(), UriKind.Absolute, out value);
 
     /// <summary>Writes a list of values of type <typeparamref name="T"/> as JSON.</summary>
     /// <param name="writer">The writer to write to.</param>
