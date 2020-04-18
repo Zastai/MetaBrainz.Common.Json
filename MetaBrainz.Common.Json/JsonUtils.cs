@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -13,15 +14,79 @@ namespace MetaBrainz.Common.Json {
   [PublicAPI]
   public static class JsonUtils {
 
-    private static readonly JsonSerializerOptions Options = new JsonSerializerOptions {
+    private static readonly JsonSerializerOptions ReaderOptions = JsonUtils.CreateReaderOptions();
+
+    private static readonly JsonSerializerOptions WriterOptions = JsonUtils.CreateWriterOptions();
+
+    /// <summary>Creates JSON serializer options for reading (deserialization).</summary>
+    /// <returns>JSON serializer options for reading (deserialization).</returns>
+    public static JsonSerializerOptions CreateReaderOptions() => new JsonSerializerOptions {
       // @formatter:off
       AllowTrailingCommas         = false,
       IgnoreNullValues            = false,
-      IgnoreReadOnlyProperties    = true,
       PropertyNameCaseInsensitive = false,
-      WriteIndented               = true,
       // @formatter:on
     };
+
+    /// <summary>Creates JSON serializer options for reading (deserialization).</summary>
+    /// <param name="readers">JSON converters to register in the options.</param>
+    /// <returns>JSON serializer options for reading (deserialization).</returns>
+    public static JsonSerializerOptions CreateReaderOptions(IEnumerable<JsonConverter> readers) {
+      var options = JsonUtils.CreateReaderOptions();
+      foreach (var reader in readers)
+        options.Converters.Add(reader);
+      return options;
+    }
+
+    /// <summary>Creates JSON serializer options for reading (deserialization).</summary>
+    /// <param name="readers">JSON converters to register in the options.</param>
+    /// <returns>JSON serializer options for reading (deserialization).</returns>
+    public static JsonSerializerOptions CreateReaderOptions(params JsonConverter[] readers)
+      => JsonUtils.CreateReaderOptions((IEnumerable<JsonConverter>) readers);
+
+    /// <summary>Creates JSON serializer options for reading (deserialization).</summary>
+    /// <param name="readers">JSON converters to register in the options.</param>
+    /// <param name="moreReaders">More JSON converters to register in the options.</param>
+    /// <returns>JSON serializer options for reading (deserialization).</returns>
+    public static JsonSerializerOptions CreateReaderOptions(IEnumerable<JsonConverter> readers, params JsonConverter[] moreReaders)
+      => JsonUtils.CreateReaderOptions(readers.Concat(moreReaders));
+
+    /// <summary>Creates JSON serializer options for writing (serialization).</summary>
+    /// <returns>JSON serializer options for writing (serialization).</returns>
+    public static JsonSerializerOptions CreateWriterOptions() => new JsonSerializerOptions {
+      // @formatter:off
+      IgnoreNullValues         = false,
+      IgnoreReadOnlyProperties = false,
+      // @formatter:on
+#if DEBUG
+      WriteIndented = true,
+#else
+      WriteIndented = false,
+#endif
+    };
+
+    /// <summary>Creates JSON serializer options for writing (serialization).</summary>
+    /// <param name="writers">JSON converters to register in the options.</param>
+    /// <returns>JSON serializer options for writing (serialization).</returns>
+    public static JsonSerializerOptions CreateWriterOptions(IEnumerable<JsonConverter> writers) {
+      var options = JsonUtils.CreateWriterOptions();
+      foreach (var reader in writers)
+        options.Converters.Add(reader);
+      return options;
+    }
+
+    /// <summary>Creates JSON serializer options for writing (serialization).</summary>
+    /// <param name="writers">JSON converters to register in the options.</param>
+    /// <returns>JSON serializer options for writing (serialization).</returns>
+    public static JsonSerializerOptions CreateWriterOptions(params JsonConverter[] writers)
+      => JsonUtils.CreateWriterOptions((IEnumerable<JsonConverter>) writers);
+
+    /// <summary>Creates JSON serializer options for writing (serialization).</summary>
+    /// <param name="writers">JSON converters to register in the options.</param>
+    /// <param name="moreWriters">More JSON converters to register in the options.</param>
+    /// <returns>JSON serializer options for writing (serialization).</returns>
+    public static JsonSerializerOptions CreateWriterOptions(IEnumerable<JsonConverter> writers, params JsonConverter[] moreWriters)
+      => JsonUtils.CreateWriterOptions(writers.Concat(moreWriters));
 
     private static string DecodeUtf8(ReadOnlySpan<byte> bytes) {
 #if NETSTD_GE_2_1 || NETCORE_GE_2_1
@@ -35,8 +100,9 @@ namespace MetaBrainz.Common.Json {
     /// <param name="json">The JSON to deserialize.</param>
     /// <typeparam name="T">The type of object to deserialize.</typeparam>
     /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
+    /// <remarks>The options used match those returned by <see cref="CreateReaderOptions()"/>.</remarks>
     public static T Deserialize<T>(string json) {
-      return JsonSerializer.Deserialize<T>(json, JsonUtils.Options);
+      return JsonSerializer.Deserialize<T>(json, JsonUtils.ReaderOptions);
     }
 
     /// <summary>Deserializes JSON to an object of the specified type, using default options.</summary>
@@ -83,7 +149,7 @@ namespace MetaBrainz.Common.Json {
     /// </returns>
     public static string Prettify(string json) {
       try {
-        return JsonSerializer.Serialize(JsonDocument.Parse(json).RootElement, JsonUtils.Options);
+        return JsonSerializer.Serialize(JsonDocument.Parse(json).RootElement, JsonUtils.WriterOptions);
       }
       catch {
         return json;
