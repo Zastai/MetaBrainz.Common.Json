@@ -8,13 +8,57 @@ using System.Threading.Tasks;
 
 using JetBrains.Annotations;
 
-using MetaBrainz.Common.Json.Converters;
-
 namespace MetaBrainz.Common.Json {
 
   /// <summary>Utility class, providing various methods to ease the use of System.Text.Json.</summary>
   [PublicAPI]
   public static class JsonUtils {
+
+    #region General Utilities
+
+    private static string DecodeUtf8(ReadOnlySpan<byte> bytes) {
+#if NETSTD_GE_2_1 || NETCORE_GE_2_1
+      return Encoding.UTF8.GetString(bytes);
+#else
+      return Encoding.UTF8.GetString(bytes.ToArray());
+#endif
+    }
+
+    /// <summary>Deserializes JSON to an object of the specified type, using default options.</summary>
+    /// <param name="json">The JSON to deserialize.</param>
+    /// <typeparam name="T">The type of object to deserialize.</typeparam>
+    /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
+    /// <remarks>The options used match those returned by <see cref="CreateReaderOptions()"/>.</remarks>
+    public static T Deserialize<T>(string json) {
+      return JsonSerializer.Deserialize<T>(json, JsonUtils.ReaderOptions);
+    }
+
+    /// <summary>Deserializes JSON to an object of the specified type, using default options.</summary>
+    /// <param name="json">The JSON to deserialize.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <typeparam name="T">The type of object to deserialize.</typeparam>
+    /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
+    public static T Deserialize<T>(string json, JsonSerializerOptions options) {
+      return JsonSerializer.Deserialize<T>(json, options);
+    }
+
+    /// <summary>Pretty-prints a JSON string.</summary>
+    /// <param name="json">The JSON string to pretty-print.</param>
+    /// <returns>
+    /// An indented version of <paramref name="json"/>. If anything goes wrong, <paramref name="json"/> is returned unchanged.
+    /// </returns>
+    public static string Prettify(string json) {
+      try {
+        return JsonSerializer.Serialize(JsonDocument.Parse(json).RootElement, JsonUtils.WriterOptions);
+      }
+      catch {
+        return json;
+      }
+    }
+
+    #endregion
+
+    #region Options
 
     private static readonly JsonSerializerOptions ReaderOptions = JsonUtils.CreateReaderOptions();
 
@@ -90,40 +134,38 @@ namespace MetaBrainz.Common.Json {
     public static JsonSerializerOptions CreateWriterOptions(IEnumerable<JsonConverter> writers, params JsonConverter[] moreWriters)
       => JsonUtils.CreateWriterOptions(writers.Concat(moreWriters));
 
-    private static string DecodeUtf8(ReadOnlySpan<byte> bytes) {
-#if NETSTD_GE_2_1 || NETCORE_GE_2_1
-      return Encoding.UTF8.GetString(bytes);
-#else
-      return Encoding.UTF8.GetString(bytes.ToArray());
-#endif
-    }
+    #endregion
 
-    /// <summary>Deserializes JSON to an object of the specified type, using default options.</summary>
-    /// <param name="json">The JSON to deserialize.</param>
-    /// <typeparam name="T">The type of object to deserialize.</typeparam>
-    /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
-    /// <remarks>The options used match those returned by <see cref="CreateReaderOptions()"/>.</remarks>
-    public static T Deserialize<T>(string json) {
-      return JsonSerializer.Deserialize<T>(json, JsonUtils.ReaderOptions);
-    }
-
-    /// <summary>Deserializes JSON to an object of the specified type, using default options.</summary>
-    /// <param name="json">The JSON to deserialize.</param>
-    /// <param name="options">The options to use for deserialization.</param>
-    /// <typeparam name="T">The type of object to deserialize.</typeparam>
-    /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
-    public static T Deserialize<T>(string json, JsonSerializerOptions options) {
-      return JsonSerializer.Deserialize<T>(json, options);
-    }
+    #region Read Operations
 
     /// <summary>Reads and converts JSON to an object of type <typeparamref name="T"/>.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <param name="options">The options to use for deserialization.</param>
     /// <param name="converter">The specific converter to use for deserialization.</param>
     /// <returns>The object of type <typeparamref name="T"/> that was read.</returns>
-    /// <typeparam name="T">The type of object to read.</typeparam>
+    /// <typeparam name="T">The type to read.</typeparam>
     public static T GetObject<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
       => converter.Read(ref reader, typeof(T), options);
+
+    /// <summary>Reads and converts JSON to an object of type <typeparamref name="T"/>, allowing <see langword="null"/>.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <param name="converter">The specific converter to use for deserialization.</param>
+    /// <returns>The object of type <typeparamref name="T"/> that was read.</returns>
+    /// <typeparam name="T">The reference type to read.</typeparam>
+    public static T? GetOptionalObject<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
+      where T : class
+      => (reader.TokenType == JsonTokenType.Null) ? null : converter.Read(ref reader, typeof(T), options);
+
+    /// <summary>Reads and converts JSON to a value of type <typeparamref name="T"/>, allowing <see langword="null"/>.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <param name="converter">The specific converter to use for deserialization.</param>
+    /// <returns>The (nullable) value of type <typeparamref name="T"/> that was read.</returns>
+    /// <typeparam name="T">The value type to read.</typeparam>
+    public static T? GetOptionalValue<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
+      where T : struct
+      => (reader.TokenType == JsonTokenType.Null) ? (T?) null : converter.Read(ref reader, typeof(T), options);
 
     /// <summary>Decodes the current raw JSON value as a string.</summary>
     /// <param name="reader">The UTF-8 JSON reader to get the raw value from.</param>
@@ -152,20 +194,15 @@ namespace MetaBrainz.Common.Json {
         return uri ?? throw new JsonException("Expected a URI but received null.");
       throw new JsonException($"Expected a URI but received a JSON token of type '{reader.TokenType}' ({reader.GetRawStringValue()}).");
     }
-
-    /// <summary>Pretty-prints a JSON string.</summary>
-    /// <param name="json">The JSON string to pretty-print.</param>
-    /// <returns>
-    /// An indented version of <paramref name="json"/>. If anything goes wrong, <paramref name="json"/> is returned unchanged.
-    /// </returns>
-    public static string Prettify(string json) {
-      try {
-        return JsonSerializer.Serialize(JsonDocument.Parse(json).RootElement, JsonUtils.WriterOptions);
-      }
-      catch {
-        return json;
-      }
-    }
+    /// <summary>Reads and converts JSON to a value of type <typeparamref name="T"/>.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <param name="converter">The specific converter to use for deserialization.</param>
+    /// <returns>The value of type <typeparamref name="T"/> that was read.</returns>
+    /// <typeparam name="T">The value type to read.</typeparam>
+    public static T GetValue<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
+      where T : struct
+      => converter.Read(ref reader, typeof(T), options);
 
     /// <summary>Reads and converts JSON to a (read-only) list of <typeparamref name="T"/>.</summary>
     /// <param name="reader">The reader to use.</param>
@@ -284,16 +321,16 @@ namespace MetaBrainz.Common.Json {
     public static bool TryGetUri(this ref Utf8JsonReader reader, out Uri? value)
       => Uri.TryCreate(reader.GetString(), UriKind.Absolute, out value);
 
+    #endregion
+
+    #region Write Operations
+
     /// <summary>Writes a list of values of type <typeparamref name="T"/> as JSON.</summary>
     /// <param name="writer">The writer to write to.</param>
     /// <param name="values">The values to write.</param>
     /// <param name="options">The options to use for serialization.</param>
     /// <typeparam name="T">The element type for the list.</typeparam>
     public static void WriteList<T>(this Utf8JsonWriter writer, IEnumerable<T> values, JsonSerializerOptions options) {
-      if (values == null) {
-        writer.WriteNullValue();
-        return;
-      }
       writer.WriteStartArray();
       foreach (var value in values)
         JsonSerializer.Serialize(writer, value, options);
@@ -366,6 +403,8 @@ namespace MetaBrainz.Common.Json {
     public static Task WriteListAsync<TList, TConverter>(this Utf8JsonWriter writer, IAsyncEnumerable<TList> values, JsonSerializerOptions options, JsonConverter<TConverter> converter)
       where TList : TConverter
       => writer.WriteListAsync(values, converter, options);
+
+    #endregion
 
   }
 
