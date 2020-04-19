@@ -206,6 +206,18 @@ namespace MetaBrainz.Common.Json {
 
     /// <summary>Reads and converts JSON to a (read-only) list of <typeparamref name="T"/>.</summary>
     /// <param name="reader">The reader to use.</param>
+    /// <param name="converter">The specific converter to use for deserialization.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <returns>
+    /// A (read-only) list of <typeparamref name="T"/> containing the elements read, or <see langword="null"/> if the value was
+    /// specified as <c>null</c>.
+    /// </returns>
+    /// <typeparam name="T">The element type for the list.</typeparam>
+    public static IReadOnlyList<T>? ReadList<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
+      => reader.ReadList<T, T>(converter, options);
+
+    /// <summary>Reads and converts JSON to a (read-only) list of <typeparamref name="T"/>.</summary>
+    /// <param name="reader">The reader to use.</param>
     /// <param name="options">The options to use for deserialization.</param>
     /// <param name="converter">The specific converter to use for deserialization.</param>
     /// <returns>
@@ -213,20 +225,21 @@ namespace MetaBrainz.Common.Json {
     /// specified as <c>null</c>.
     /// </returns>
     /// <typeparam name="T">The element type for the list.</typeparam>
+    [Obsolete("Use the overload that takes the options as last argument.")]
     public static IReadOnlyList<T>? ReadList<T>(this ref Utf8JsonReader reader, JsonSerializerOptions options, JsonConverter<T> converter)
-      => reader.ReadList<T, T>(options, converter);
+      => reader.ReadList<T, T>(converter, options);
 
     /// <summary>Reads and converts JSON to a (read-only) list of <typeparamref name="TList"/>.</summary>
     /// <param name="reader">The reader to use.</param>
-    /// <param name="options">The options to use for deserialization.</param>
     /// <param name="converter">The specific converter to use for deserialization.</param>
+    /// <param name="options">The options to use for deserialization.</param>
     /// <returns>
     /// A (read-only) list of <typeparamref name="TList"/> containing the elements read, or <see langword="null"/> if the value was
     /// specified as <c>null</c>.
     /// </returns>
     /// <typeparam name="TList">The element type for the list.</typeparam>
     /// <typeparam name="TElement">The type to use when deserializing the elements of the list.</typeparam>
-    public static IReadOnlyList<TList>? ReadList<TList, TElement>(this ref Utf8JsonReader reader, JsonSerializerOptions options, JsonConverter<TElement> converter) where TElement : TList {
+    public static IReadOnlyList<TList>? ReadList<TList, TElement>(this ref Utf8JsonReader reader, JsonConverter<TElement> converter, JsonSerializerOptions options) where TElement : TList {
       if (reader.TokenType == JsonTokenType.Null)
         return null;
       if (reader.TokenType != JsonTokenType.StartArray)
@@ -242,6 +255,21 @@ namespace MetaBrainz.Common.Json {
       }
       return elements;
     }
+
+    /// <summary>Reads and converts JSON to a (read-only) list of <typeparamref name="TList"/>.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <param name="converter">The specific converter to use for deserialization.</param>
+    /// <returns>
+    /// A (read-only) list of <typeparamref name="TList"/> containing the elements read, or <see langword="null"/> if the value was
+    /// specified as <c>null</c>.
+    /// </returns>
+    /// <typeparam name="TList">The element type for the list.</typeparam>
+    /// <typeparam name="TElement">The type to use when deserializing the elements of the list.</typeparam>
+    [Obsolete("Use the overload that takes the options as last argument.")]
+    public static IReadOnlyList<TList>? ReadList<TList, TElement>(this ref Utf8JsonReader reader, JsonSerializerOptions options, JsonConverter<TElement> converter)
+      where TElement : TList
+      => reader.ReadList<TList, TElement>(converter, options);
 
     /// <summary>
     /// Tries to parse the given reader's current JSON token value as an absolute <see cref="Uri">URI</see> and returns a value that
@@ -275,20 +303,28 @@ namespace MetaBrainz.Common.Json {
     /// <summary>Writes a list of values of type <typeparamref name="TList"/> as JSON.</summary>
     /// <param name="writer">The writer to write to.</param>
     /// <param name="values">The values to write.</param>
-    /// <param name="options">The options to use for serialization.</param>
     /// <param name="converter">The specific converter to use for serialization.</param>
+    /// <param name="options">The options to use for serialization.</param>
     /// <typeparam name="TList">The element type for the list.</typeparam>
     /// <typeparam name="TConverter">The specific type used by the converter.</typeparam>
-    public static void WriteList<TList,TConverter>(this Utf8JsonWriter writer, IEnumerable<TList> values, JsonSerializerOptions options, JsonConverter<TConverter> converter) where TList : TConverter {
-      if (values == null) {
-        writer.WriteNullValue();
-        return;
-      }
+    public static void WriteList<TList,TConverter>(this Utf8JsonWriter writer, IEnumerable<TList> values, JsonConverter<TConverter> converter, JsonSerializerOptions options) where TList : TConverter {
       writer.WriteStartArray();
       foreach (var value in values)
         converter.Write(writer, value, options);
       writer.WriteEndArray();
     }
+
+    /// <summary>Writes a list of values of type <typeparamref name="TList"/> as JSON.</summary>
+    /// <param name="writer">The writer to write to.</param>
+    /// <param name="values">The values to write.</param>
+    /// <param name="options">The options to use for serialization.</param>
+    /// <param name="converter">The specific converter to use for serialization.</param>
+    /// <typeparam name="TList">The element type for the list.</typeparam>
+    /// <typeparam name="TConverter">The specific type used by the converter.</typeparam>
+    [Obsolete("Use the overload that takes the options as last argument.")]
+    public static void WriteList<TList,TConverter>(this Utf8JsonWriter writer, IEnumerable<TList> values, JsonSerializerOptions options, JsonConverter<TConverter> converter)
+      where TList : TConverter
+      => writer.WriteList(values, converter, options);
 
     /// <summary>Writes a list of values of type <typeparamref name="T"/> as JSON.</summary>
     /// <param name="writer">The writer to write to.</param>
@@ -297,13 +333,24 @@ namespace MetaBrainz.Common.Json {
     /// <returns>A task that performs the writes.</returns>
     /// <typeparam name="T">The element type for the list.</typeparam>
     public static async Task WriteListAsync<T>(this Utf8JsonWriter writer, IAsyncEnumerable<T> values, JsonSerializerOptions options) {
-      if (values == null) {
-        writer.WriteNullValue();
-        return;
-      }
       writer.WriteStartArray();
       await foreach (var value in values)
         JsonSerializer.Serialize(writer, value, options);
+      writer.WriteEndArray();
+    }
+
+    /// <summary>Writes a list of values of type <typeparamref name="TList"/> as JSON.</summary>
+    /// <param name="writer">The writer to write to.</param>
+    /// <param name="values">The values to write.</param>
+    /// <param name="converter">The specific converter to use for serialization.</param>
+    /// <param name="options">The options to use for serialization.</param>
+    /// <returns>A task that performs the writes.</returns>
+    /// <typeparam name="TList">The element type for the list.</typeparam>
+    /// <typeparam name="TConverter">The specific type used by the converter.</typeparam>
+    public static async Task WriteListAsync<TList, TConverter>(this Utf8JsonWriter writer, IAsyncEnumerable<TList> values, JsonConverter<TConverter> converter, JsonSerializerOptions options) where TList : TConverter {
+      writer.WriteStartArray();
+      await foreach (var value in values)
+        converter.Write(writer, value, options);
       writer.WriteEndArray();
     }
 
@@ -315,16 +362,10 @@ namespace MetaBrainz.Common.Json {
     /// <returns>A task that performs the writes.</returns>
     /// <typeparam name="TList">The element type for the list.</typeparam>
     /// <typeparam name="TConverter">The specific type used by the converter.</typeparam>
-    public static async Task WriteListAsync<TList, TConverter>(this Utf8JsonWriter writer, IAsyncEnumerable<TList> values, JsonSerializerOptions options, JsonConverter<TConverter> converter) where TList : TConverter {
-      if (values == null) {
-        writer.WriteNullValue();
-        return;
-      }
-      writer.WriteStartArray();
-      await foreach (var value in values)
-        converter.Write(writer, value, options);
-      writer.WriteEndArray();
-    }
+    [Obsolete("Use the overload that takes the options as last argument.")]
+    public static Task WriteListAsync<TList, TConverter>(this Utf8JsonWriter writer, IAsyncEnumerable<TList> values, JsonSerializerOptions options, JsonConverter<TConverter> converter)
+      where TList : TConverter
+      => writer.WriteListAsync(values, converter, options);
 
   }
 
