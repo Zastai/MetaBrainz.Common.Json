@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 using JetBrains.Annotations;
 
+using MetaBrainz.Common.Json.Converters;
+
 namespace MetaBrainz.Common.Json {
 
   /// <summary>Utility class, providing various methods to ease the use of System.Text.Json.</summary>
@@ -113,6 +115,15 @@ namespace MetaBrainz.Common.Json {
     public static T Deserialize<T>(string json, JsonSerializerOptions options) {
       return JsonSerializer.Deserialize<T>(json, options);
     }
+
+    /// <summary>Reads and converts JSON to an object of type <typeparamref name="T"/>.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <param name="converter">The specific converter to use for deserialization.</param>
+    /// <returns>The object of type <typeparamref name="T"/> that was read.</returns>
+    /// <typeparam name="T">The type of object to read.</typeparam>
+    public static T GetObject<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
+      => converter.Read(ref reader, typeof(T), options);
 
     /// <summary>Decodes the current raw JSON value as a string.</summary>
     /// <param name="reader">The UTF-8 JSON reader to get the raw value from.</param>
