@@ -141,7 +141,7 @@ namespace MetaBrainz.Common.Json.Converters {
             return Array.Empty<object?>();
           var elements = new List<object?>();
           while (reader.TokenType != JsonTokenType.EndArray) {
-            elements.Add(this.Read(ref reader, typeToConvert, options));
+            elements.Add((reader.TokenType == JsonTokenType.Null) ? null : this.Read(ref reader, typeToConvert, options));
             reader.Read();
           }
           try {
@@ -188,7 +188,7 @@ namespace MetaBrainz.Common.Json.Converters {
             if (obj.ContainsKey(prop))
               throw new JsonException($"Encountered a duplicate JSON object property ('{prop}').");
             reader.Read();
-            obj[prop] = this.Read(ref reader, typeToConvert, options);
+            obj[prop] = (reader.TokenType == JsonTokenType.Null) ? null : this.Read(ref reader, typeToConvert, options);
             reader.Read();
           }
           return obj;
