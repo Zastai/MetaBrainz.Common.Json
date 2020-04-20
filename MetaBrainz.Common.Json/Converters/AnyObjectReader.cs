@@ -8,7 +8,7 @@ namespace MetaBrainz.Common.Json.Converters {
 
   /// <summary>A JSON reader that handles fields of type <see cref="object"/> using the most appropriate framework type.</summary>
   [PublicAPI]
-  public sealed class AnyObjectReader : JsonReader<object?> {
+  public sealed class AnyObjectReader : JsonReader<object> {
 
     /// <summary>A global instance, for easy use without unnecessary object allocation.</summary>
     /// <remarks>This reader is stateless, so this single instance can be used everywhere.</remarks>
@@ -78,12 +78,11 @@ namespace MetaBrainz.Common.Json.Converters {
     /// preserved more digits. The degenerate case (where the decimal would be 0) is detected, but in other cases the less precise
     /// decimal will be used.
     /// </remarks>
-    public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+    public override object Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
       switch (reader.TokenType) {
         // Easy cases
         case JsonTokenType.False: return false;
         case JsonTokenType.True:  return true;
-        case JsonTokenType.Null:  return null;
         // Cases requiring further deduction
         case JsonTokenType.Number: {
           if (reader.TryGetInt32(out var i32))
@@ -195,7 +194,7 @@ namespace MetaBrainz.Common.Json.Converters {
           return obj;
         }
         default:
-          throw new JsonException($"Unexpected JSON token: {reader.TokenType}.");
+          throw new JsonException($"Token ({reader.TokenType}: {reader.GetRawStringValue()}) cannot be converted to an object.");
       }
 
     }
