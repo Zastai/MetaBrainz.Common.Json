@@ -156,17 +156,76 @@ namespace MetaBrainz.Common.Json {
     public static object GetObject(this ref Utf8JsonReader reader, JsonSerializerOptions options)
       => AnyObjectReader.Instance.Read(ref reader, typeof(object), options);
 
+    /// <summary>Reads and converts JSON to a boolean value, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>The boolean value that was read, or <see langword="null"/> if a JSON null value was found.</returns>
+    public static bool? GetOptionalBoolean(this ref Utf8JsonReader reader)
+      => (reader.TokenType == JsonTokenType.Null) ? (bool?) null : reader.GetBoolean();
+
+    /// <summary>Reads and converts JSON to an 8-bit unsigned integer, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>The 8-bit unsigned integer that was read, or <see langword="null"/> if a JSON null value was found.</returns>
+    public static byte? GetOptionalByte(this ref Utf8JsonReader reader)
+      => (reader.TokenType == JsonTokenType.Null) ? (byte?) null : reader.GetByte();
+
     /// <summary>Reads and converts JSON to a <see cref="DateTimeOffset"/>, allowing null.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <returns>The <see cref="DateTimeOffset"/> that was read, or <see langword="null"/> if a JSON null value was found.</returns>
     public static DateTimeOffset? GetOptionalDateTimeOffset(this ref Utf8JsonReader reader)
       => (reader.TokenType == JsonTokenType.Null) ? (DateTimeOffset?) null : reader.GetDateTimeOffset();
 
+    /// <summary>Reads and converts JSON to a decimal value, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>The decimal value that was read, or <see langword="null"/> if a JSON null value was found.</returns>
+    public static decimal? GetOptionalDecimal(this ref Utf8JsonReader reader)
+      => (reader.TokenType == JsonTokenType.Null) ? (decimal?) null : reader.GetDecimal();
+
+    /// <summary>Reads and converts JSON to a double-precision floating-point value, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>
+    /// The double-precision floating-point value that was read, or <see langword="null"/> if a JSON null value was found.
+    /// </returns>
+    public static double? GetOptionalDouble(this ref Utf8JsonReader reader)
+      => (reader.TokenType == JsonTokenType.Null) ? (double?) null : reader.GetDouble();
+
     /// <summary>Reads and converts JSON to a <see cref="Guid">UUID</see>, allowing null.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <returns>The <see cref="Guid">UUID</see> that was read, or <see langword="null"/> if a JSON null value was found.</returns>
     public static Guid? GetOptionalGuid(this ref Utf8JsonReader reader)
       => (reader.TokenType == JsonTokenType.Null) ? (Guid?) null : reader.GetGuid();
+
+    /// <summary>Reads and converts JSON to a 16-bit signed integer, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>The 16-bit signed integer that was read, or <see langword="null"/> if a JSON null value was found.</returns>
+    public static short? GetOptionalInt16(this ref Utf8JsonReader reader)
+      => (reader.TokenType == JsonTokenType.Null) ? (short?) null : reader.GetInt16();
+
+    /// <summary>Reads and converts JSON to a 32-bit signed integer, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>The 32-bit signed integer that was read, or <see langword="null"/> if a JSON null value was found.</returns>
+    public static int? GetOptionalInt32(this ref Utf8JsonReader reader)
+      => (reader.TokenType == JsonTokenType.Null) ? (int?) null : reader.GetInt32();
+
+    /// <summary>Reads and converts JSON to a 64-bit signed integer, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>The 64-bit signed integer that was read, or <see langword="null"/> if a JSON null value was found.</returns>
+    public static long? GetOptionalInt64(this ref Utf8JsonReader reader)
+      => (reader.TokenType == JsonTokenType.Null) ? (long?) null : reader.GetInt64();
+
+    /// <summary>Reads and converts JSON to an 8-bit signed integer, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>The 8-bit signed integer that was read, or <see langword="null"/> if a JSON null value was found.</returns>
+    [CLSCompliant(false)]
+    public static sbyte? GetOptionalSByte(this ref Utf8JsonReader reader)
+      => (reader.TokenType == JsonTokenType.Null) ? (sbyte?) null : reader.GetSByte();
+
+    /// <summary>Reads and converts JSON to a single-precision floating-point value, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>
+    /// The single-precision floating-point value that was read, or <see langword="null"/> if a JSON null value was found.
+    /// </returns>
+    public static float? GetOptionalSingle(this ref Utf8JsonReader reader)
+      => (reader.TokenType == JsonTokenType.Null) ? (float?) null : reader.GetSingle();
 
     /// <summary>Reads and converts JSON to an object of type <typeparamref name="T"/>, allowing null.</summary>
     /// <param name="reader">The reader to use.</param>
@@ -188,6 +247,27 @@ namespace MetaBrainz.Common.Json {
     /// </returns>
     public static object? GetOptionalObject(this ref Utf8JsonReader reader, JsonSerializerOptions options)
       => (reader.TokenType == JsonTokenType.Null) ? null : AnyObjectReader.Instance.Read(ref reader, typeof(object), options);
+
+    /// <summary>Reads and converts JSON to a 16-bit unsigned integer, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>The 16-bit unsigned integer that was read, or <see langword="null"/> if a JSON null value was found.</returns>
+    [CLSCompliant(false)]
+    public static ushort? GetOptionalUInt16(this ref Utf8JsonReader reader)
+      => (reader.TokenType == JsonTokenType.Null) ? (ushort?) null : reader.GetUInt16();
+
+    /// <summary>Reads and converts JSON to a 32-bit unsigned integer, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>The 32-bit unsigned integer that was read, or <see langword="null"/> if a JSON null value was found.</returns>
+    [CLSCompliant(false)]
+    public static uint? GetOptionalUInt32(this ref Utf8JsonReader reader)
+      => (reader.TokenType == JsonTokenType.Null) ? (uint?) null : reader.GetUInt32();
+
+    /// <summary>Reads and converts JSON to a 64-bit unsigned integer, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>The 64-bit unsigned integer that was read, or <see langword="null"/> if a JSON null value was found.</returns>
+    [CLSCompliant(false)]
+    public static ulong? GetOptionalUInt64(this ref Utf8JsonReader reader)
+      => (reader.TokenType == JsonTokenType.Null) ? (ulong?) null : reader.GetUInt64();
 
     /// <summary>Reads and converts JSON to a value of type <typeparamref name="T"/>, allowing null.</summary>
     /// <param name="reader">The reader to use.</param>
