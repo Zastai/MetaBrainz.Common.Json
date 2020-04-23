@@ -269,6 +269,17 @@ namespace MetaBrainz.Common.Json {
     public static ulong? GetOptionalUInt64(this ref Utf8JsonReader reader)
       => (reader.TokenType == JsonTokenType.Null) ? (ulong?) null : reader.GetUInt64();
 
+    /// <summary>
+    /// Takes the next JSON token value from the specified reader and parses it as an absolute <see cref="Uri">URI</see>.
+    /// </summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <returns>The URI, if the entire UTF-8 encoded token value was successfully parsed.</returns>
+    /// <exception cref="JsonException">
+    /// When the current JSON token value is not a string, or could not be parsed as an absolute <see cref="Uri">URI</see>.
+    /// </exception>
+    public static Uri? GetOptionalUri(this ref Utf8JsonReader reader)
+      => (reader.TokenType == JsonTokenType.Null) ? null : reader.GetUri();
+
     /// <summary>Reads and converts JSON to a value of type <typeparamref name="T"/>, allowing null.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <param name="options">The options to use for deserialization.</param>
@@ -309,6 +320,7 @@ namespace MetaBrainz.Common.Json {
         return uri ?? throw new JsonException("Expected a URI but received null.");
       throw new JsonException($"Expected a URI but received a JSON token of type '{reader.TokenType}' ({reader.GetRawStringValue()}).");
     }
+
     /// <summary>Reads and converts JSON to a value of type <typeparamref name="T"/>.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <param name="options">The options to use for deserialization.</param>
