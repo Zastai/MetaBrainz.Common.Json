@@ -331,66 +331,103 @@ namespace MetaBrainz.Common.Json {
       where T : struct
       => converter.Read(ref reader, typeof(T), options);
 
-    /// <summary>Reads and converts JSON to a (read-only) list of <typeparamref name="T"/>.</summary>
+    /// <summary>Reads and converts JSON to a (read-only) dictionary.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <param name="options">The options to use for deserialization.</param>
     /// <returns>
-    /// A (read-only) list of <typeparamref name="T"/> containing the elements read, or <see langword="null"/> if the value was
-    /// specified as <c>null</c>.
+    /// A (read-only) dictionary of containing the key/value pairs read, or <see langword="null"/> if the value was specified as
+    /// <c>null</c>.
     /// </returns>
-    /// <typeparam name="T">The element type for the list.</typeparam>
-    public static IReadOnlyList<T>? ReadList<T>(this ref Utf8JsonReader reader, JsonSerializerOptions options)
-      => reader.ReadList<T, T>(options);
+    /// <typeparam name="T">The value type for the dictionary.</typeparam>
+    public static IReadOnlyDictionary<string, T>? ReadDictionary<T>(this ref Utf8JsonReader reader, JsonSerializerOptions options)
+      => reader.ReadDictionary<T, T>(options);
 
-    /// <summary>Reads and converts JSON to a (read-only) list of <typeparamref name="TList"/>.</summary>
+    /// <summary>Reads and converts JSON to a (read-only) dictionary.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <param name="options">The options to use for deserialization.</param>
     /// <returns>
-    /// A (read-only) list of <typeparamref name="TList"/> containing the elements read, or <see langword="null"/> if the value was
-    /// specified as <c>null</c>.
+    /// A (read-only) dictionary of containing the key/value pairs read, or <see langword="null"/> if the value was specified as
+    /// <c>null</c>.
     /// </returns>
-    /// <typeparam name="TList">The element type for the list.</typeparam>
-    /// <typeparam name="TElement">The type to use when deserializing the elements of the list.</typeparam>
-    public static IReadOnlyList<TList>? ReadList<TList, TElement>(this ref Utf8JsonReader reader, JsonSerializerOptions options) where TElement : TList {
+    /// <typeparam name="T">The value type for the dictionary.</typeparam>
+    /// <typeparam name="TValue">The type to use when deserializing the dictionary values.</typeparam>
+    public static IReadOnlyDictionary<string, T>? ReadDictionary<T, TValue>(this ref Utf8JsonReader reader, JsonSerializerOptions options) where TValue : T {
       if (reader.TokenType == JsonTokenType.Null)
         return null;
-      if (reader.TokenType != JsonTokenType.StartArray)
-        throw new JsonException("Expected start of list not found.");
+      if (reader.TokenType != JsonTokenType.StartObject)
+        throw new JsonException("Expected start of dictionary not found.");
       reader.Read();
-      // Shortcut for empty list
-      if (reader.TokenType == JsonTokenType.EndArray)
-        return Array.Empty<TList>();
-      var elements = new List<TList>();
-      while (reader.TokenType != JsonTokenType.EndArray) {
-        elements.Add(JsonSerializer.Deserialize<TElement>(ref reader, options));
+      var elements = new Dictionary<string, T>();
+      while (reader.TokenType != JsonTokenType.EndObject) {
+        if (reader.TokenType != JsonTokenType.PropertyName)
+          throw new JsonException("Expected key value not found.");
+        var key = reader.GetString();
+        reader.Read();
+        elements.Add(key, JsonSerializer.Deserialize<TValue>(ref reader, options));
         reader.Read();
       }
       return elements;
     }
 
-    /// <summary>Reads and converts JSON to a (read-only) list of <typeparamref name="T"/>.</summary>
+    /// <summary>Reads and converts JSON to a (read-only) dictionary.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <param name="converter">The specific converter to use for deserialization.</param>
     /// <param name="options">The options to use for deserialization.</param>
     /// <returns>
-    /// A (read-only) list of <typeparamref name="T"/> containing the elements read, or <see langword="null"/> if the value was
-    /// specified as <c>null</c>.
+    /// A (read-only) dictionary of containing the key/value pairs read, or <see langword="null"/> if the value was specified as
+    /// <c>null</c>.
+    /// </returns>
+    /// <typeparam name="T">The value type for the dictionary.</typeparam>
+    public static IReadOnlyDictionary<string, T>? ReadDictionary<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
+      => reader.ReadDictionary<T, T>(converter, options);
+
+    /// <summary>Reads and converts JSON to a (read-only) dictionary.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="converter">The specific converter to use for deserialization.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <returns>
+    /// A (read-only) dictionary of containing the key/value pairs read, or <see langword="null"/> if the value was specified as
+    /// <c>null</c>.
+    /// </returns>
+    /// <typeparam name="T">The value type for the dictionary.</typeparam>
+    /// <typeparam name="TValue">The type to use when deserializing the dictionary values.</typeparam>
+    public static IReadOnlyDictionary<string, T>? ReadDictionary<T, TValue>(this ref Utf8JsonReader reader, JsonConverter<TValue> converter, JsonSerializerOptions options) where TValue : T {
+      if (reader.TokenType == JsonTokenType.Null)
+        return null;
+      if (reader.TokenType != JsonTokenType.StartObject)
+        throw new JsonException("Expected start of dictionary not found.");
+      reader.Read();
+      var elements = new Dictionary<string, T>();
+      while (reader.TokenType != JsonTokenType.EndObject) {
+        if (reader.TokenType != JsonTokenType.PropertyName)
+          throw new JsonException("Expected key value not found.");
+        var key = reader.GetString();
+        reader.Read();
+        elements.Add(key, converter.Read(ref reader, typeof(TValue), options));
+        reader.Read();
+      }
+      return elements;
+    }
+
+    /// <summary>Reads and converts JSON to a (read-only) list.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <returns>
+    /// A (read-only) list containing the values read, or <see langword="null"/> if the value was specified as <c>null</c>.
     /// </returns>
     /// <typeparam name="T">The element type for the list.</typeparam>
-    public static IReadOnlyList<T>? ReadList<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
-      => reader.ReadList<T, T>(converter, options);
+    public static IReadOnlyList<T>? ReadList<T>(this ref Utf8JsonReader reader, JsonSerializerOptions options)
+      => reader.ReadList<T, T>(options);
 
-    /// <summary>Reads and converts JSON to a (read-only) list of <typeparamref name="TList"/>.</summary>
+    /// <summary>Reads and converts JSON to a (read-only) list.</summary>
     /// <param name="reader">The reader to use.</param>
-    /// <param name="converter">The specific converter to use for deserialization.</param>
     /// <param name="options">The options to use for deserialization.</param>
     /// <returns>
-    /// A (read-only) list of <typeparamref name="TList"/> containing the elements read, or <see langword="null"/> if the value was
-    /// specified as <c>null</c>.
+    /// A (read-only) list containing the values read, or <see langword="null"/> if the value was specified as <c>null</c>.
     /// </returns>
-    /// <typeparam name="TList">The element type for the list.</typeparam>
-    /// <typeparam name="TElement">The type to use when deserializing the elements of the list.</typeparam>
-    public static IReadOnlyList<TList>? ReadList<TList, TElement>(this ref Utf8JsonReader reader, JsonConverter<TElement> converter, JsonSerializerOptions options) where TElement : TList {
+    /// <typeparam name="T">The value type for the list.</typeparam>
+    /// <typeparam name="TValue">The type to use when deserializing the list values.</typeparam>
+    public static IReadOnlyList<T>? ReadList<T, TValue>(this ref Utf8JsonReader reader, JsonSerializerOptions options) where TValue : T {
       if (reader.TokenType == JsonTokenType.Null)
         return null;
       if (reader.TokenType != JsonTokenType.StartArray)
@@ -398,10 +435,47 @@ namespace MetaBrainz.Common.Json {
       reader.Read();
       // Shortcut for empty list
       if (reader.TokenType == JsonTokenType.EndArray)
-        return Array.Empty<TList>();
-      var elements = new List<TList>();
+        return Array.Empty<T>();
+      var elements = new List<T>();
       while (reader.TokenType != JsonTokenType.EndArray) {
-        elements.Add(converter.Read(ref reader, typeof(TElement), options));
+        elements.Add(JsonSerializer.Deserialize<TValue>(ref reader, options));
+        reader.Read();
+      }
+      return elements;
+    }
+
+    /// <summary>Reads and converts JSON to a (read-only) list.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="converter">The specific converter to use for deserialization.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <returns>
+    /// A (read-only) list containing the values read, or <see langword="null"/> if the value was specified as <c>null</c>.
+    /// </returns>
+    /// <typeparam name="T">The value type for the list.</typeparam>
+    public static IReadOnlyList<T>? ReadList<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
+      => reader.ReadList<T, T>(converter, options);
+
+    /// <summary>Reads and converts JSON to a (read-only) list.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="converter">The specific converter to use for deserialization.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <returns>
+    /// A (read-only) list containing the elements read, or <see langword="null"/> if the value was specified as <c>null</c>.
+    /// </returns>
+    /// <typeparam name="T">The value type for the list.</typeparam>
+    /// <typeparam name="TValue">The type to use when deserializing the list values.</typeparam>
+    public static IReadOnlyList<T>? ReadList<T, TValue>(this ref Utf8JsonReader reader, JsonConverter<TValue> converter, JsonSerializerOptions options) where TValue : T {
+      if (reader.TokenType == JsonTokenType.Null)
+        return null;
+      if (reader.TokenType != JsonTokenType.StartArray)
+        throw new JsonException("Expected start of list not found.");
+      reader.Read();
+      // Shortcut for empty list
+      if (reader.TokenType == JsonTokenType.EndArray)
+        return Array.Empty<T>();
+      var elements = new List<T>();
+      while (reader.TokenType != JsonTokenType.EndArray) {
+        elements.Add(converter.Read(ref reader, typeof(TValue), options));
         reader.Read();
       }
       return elements;
