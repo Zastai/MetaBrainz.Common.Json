@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 
 using JetBrains.Annotations;
@@ -31,18 +33,34 @@ namespace MetaBrainz.Common.Json {
     /// <typeparam name="T">The type of object to deserialize.</typeparam>
     /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
     /// <remarks>The options used match those returned by <see cref="CreateReaderOptions()"/>.</remarks>
-    public static T Deserialize<T>(string json) {
-      return JsonSerializer.Deserialize<T>(json, JsonUtils.ReaderOptions);
-    }
+    public static T Deserialize<T>(string json)
+      => JsonUtils.Deserialize<T>(json, JsonUtils.ReaderOptions);
 
-    /// <summary>Deserializes JSON to an object of the specified type, using default options.</summary>
+    /// <summary>Deserializes JSON to an object of the specified type.</summary>
     /// <param name="json">The JSON to deserialize.</param>
     /// <param name="options">The options to use for deserialization.</param>
     /// <typeparam name="T">The type of object to deserialize.</typeparam>
     /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
-    public static T Deserialize<T>(string json, JsonSerializerOptions options) {
-      return JsonSerializer.Deserialize<T>(json, options);
-    }
+    public static T Deserialize<T>(string json, JsonSerializerOptions options)
+      => JsonSerializer.Deserialize<T>(json, options);
+
+    /// <summary>Deserializes JSON to an object of the specified type, using default options.</summary>
+    /// <param name="json">The JSON to deserialize.</param>
+    /// <typeparam name="T">The type of object to deserialize.</typeparam>
+    /// <param name="cancellationToken">A token that may be used to cancel the read operation.</param>
+    /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
+    /// <remarks>The options used match those returned by <see cref="CreateReaderOptions()"/>.</remarks>
+    public static ValueTask<T> DeserializeAsync<T>(Stream json, CancellationToken cancellationToken = default)
+      => JsonUtils.DeserializeAsync<T>(json, JsonUtils.ReaderOptions, cancellationToken);
+
+    /// <summary>Deserializes JSON to an object of the specified type.</summary>
+    /// <param name="json">The JSON to deserialize.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <param name="cancellationToken">A token that may be used to cancel the read operation.</param>
+    /// <typeparam name="T">The type of object to deserialize.</typeparam>
+    /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
+    public static ValueTask<T> DeserializeAsync<T>(Stream json, JsonSerializerOptions options, CancellationToken cancellationToken = default)
+      => JsonSerializer.DeserializeAsync<T>(json, options, cancellationToken);
 
     /// <summary>Pretty-prints a JSON string.</summary>
     /// <param name="json">The JSON string to pretty-print.</param>
