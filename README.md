@@ -4,14 +4,55 @@ JSON-related helper classes, for use by the other `MetaBrainz.*` packages.
 
 ## Release Notes
 
-### v1.2.0 (_work in progress_)
-
-#### API Changes
+### v2.0.0 (2020-04-24)
 
 #### API Additions
 
+- New Method: `JsonUtils.CreateReaderOptions()`, optionally specifying a set of converters to register
+- New Method: `JsonUtils.CreateWriterOptions()`, optionally specifying a set of converters to register
+- New Method: `JsonUtils.DeserializeAsync()`
+- New Extension Method: `JsonUtils.GetObject()`
+- New Extension Method: `JsonUtils.GetOptionalBoolean()`
+- New Extension Method: `JsonUtils.GetOptionalByte()`
+- New Extension Method: `JsonUtils.GetOptionalDateTimeOffset()`
+- New Extension Method: `JsonUtils.GetOptionalDecimal()`
+- New Extension Method: `JsonUtils.GetOptionalDouble()`
+- New Extension Method: `JsonUtils.GetOptionalGuid()`
+- New Extension Method: `JsonUtils.GetOptionalInt16()`
+- New Extension Method: `JsonUtils.GetOptionalInt32()`
+- New Extension Method: `JsonUtils.GetOptionalInt64()`
+- New Extension Method: `JsonUtils.GetOptionalObject()`
+- New Extension Method: `JsonUtils.GetOptionalSbyte()`
+- New Extension Method: `JsonUtils.GetOptionalSingle()`
+- New Extension Method: `JsonUtils.GetOptionalUInt16()`
+- New Extension Method: `JsonUtils.GetOptionalUInt32()`
+- New Extension Method: `JsonUtils.GetOptionalUInt64()`
+- New Extension Method: `JsonUtils.GetOptionalUri()`
+- New Extension Method: `JsonUtils.GetOptionalValue()`
 - New Extension Method: `JsonUtils.GetUri()`
+- New Extension Method: `JsonUtils.GetValue()`
+- New Extension Method: `JsonUtils.ReadDictionary()`
 - New Extension Method: `JsonUtils.TryGetUri()`
+
+#### API Changes
+
+- `AnyObjectReader` is now a `JsonReader<object>` instead of `JsonReader<object?>` and will no longer deserialize a JSON `null`
+  - *this is a breaking change*
+  - note: it will still handle `null`s inside arrays or objects it deserializes
+- `JsonBasedObject.UnhandledProperties` is now an `IReadOnlyDictionary<string, object?>?` instead of `Dictionary<string, object?>?`
+  and is no longer marked `[JsonExtensionData]`
+  - *this is a breaking change*
+- `JsonUtils.ReadList()` is now an extension method
+- `JsonUtils.WriteList()` is now an extension method
+- `JsonUtils.ReadList()` now takes the serializer options as the last argument
+  - *this is a breaking change*
+
+#### API Removals
+
+- `AnyObjectConverter` has been removed
+  - it has been superseded by `AnyObjectReader`
+- `InterfaceConverter` and `ReadOnlyListOfInterfaceConverter` have been removed
+  - the MetaBrainz libraries are switching to custom converters for everything, removing the need for these
 
 #### Other Changes
 
