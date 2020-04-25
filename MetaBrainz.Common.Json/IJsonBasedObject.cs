@@ -9,7 +9,7 @@ namespace MetaBrainz.Common.Json {
   public interface IJsonBasedObject {
 
     /// <summary>
-    /// A dictionary containing all properties not handled by this library.<br/>
+    /// A dictionary containing all properties not otherwise handled.
     /// This should be <see langword="null"/>; if it's not, please file a ticket, listing its contents.
     /// </summary>
     IReadOnlyDictionary<string, object?>? UnhandledProperties { get; }

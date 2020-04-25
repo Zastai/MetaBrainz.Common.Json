@@ -8,8 +8,10 @@ namespace MetaBrainz.Common.Json {
   [PublicAPI]
   public abstract class JsonBasedObject : IJsonBasedObject {
 
-    /// <inheritdoc/>
-    public IReadOnlyDictionary<string, object?>? UnhandledProperties { get; set; }
+    IReadOnlyDictionary<string, object?>? IJsonBasedObject.UnhandledProperties => this.UnhandledProperties;
+
+    /// <summary>A dictionary containing all properties not otherwise handled.</summary>
+    public Dictionary<string, object?>? UnhandledProperties { get; set; }
 
   }
 
