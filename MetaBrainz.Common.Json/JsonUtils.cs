@@ -174,6 +174,14 @@ namespace MetaBrainz.Common.Json {
     public static object GetObject(this ref Utf8JsonReader reader, JsonSerializerOptions options)
       => AnyObjectReader.Instance.Read(ref reader, typeof(object), options);
 
+    /// <summary>Reads and converts JSON to an object of type <typeparamref name="T"/>.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <returns>The object of type <typeparamref name="T"/> that was read.</returns>
+    /// <typeparam name="T">The type to read.</typeparam>
+    public static T GetObject<T>(this ref Utf8JsonReader reader, JsonSerializerOptions options)
+      => JsonSerializer.Deserialize<T>(ref reader, options);
+
     /// <summary>Reads and converts JSON to a boolean value, allowing null.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <returns>The boolean value that was read, or <see langword="null"/> if a JSON null value was found.</returns>
@@ -230,6 +238,38 @@ namespace MetaBrainz.Common.Json {
     public static long? GetOptionalInt64(this ref Utf8JsonReader reader)
       => (reader.TokenType == JsonTokenType.Null) ? (long?) null : reader.GetInt64();
 
+    /// <summary>Reads and converts JSON to an object of type <typeparamref name="T"/>, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <param name="converter">The specific converter to use for deserialization.</param>
+    /// <returns>
+    /// The object of type <typeparamref name="T"/> that was read, or <see langword="null"/> if a JSON null value was found.
+    /// </returns>
+    /// <typeparam name="T">The reference type to read.</typeparam>
+    public static T? GetOptionalObject<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
+      where T : class
+      => (reader.TokenType == JsonTokenType.Null) ? null : reader.GetObject(converter, options);
+
+    /// <summary>Reads and converts JSON to an appropriate object, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <returns>
+    /// The object that was read (using <see cref="AnyObjectReader"/>, or <see langword="null"/> if a JSON null value was found.
+    /// </returns>
+    public static object? GetOptionalObject(this ref Utf8JsonReader reader, JsonSerializerOptions options)
+      => (reader.TokenType == JsonTokenType.Null) ? null : reader.GetObject(options);
+
+    /// <summary>Reads and converts JSON to an object of type <typeparamref name="T"/>, allowing null.</summary>
+    /// <param name="reader">The reader to use.</param>
+    /// <param name="options">The options to use for deserialization.</param>
+    /// <returns>
+    /// The object of type <typeparamref name="T"/> that was read, or <see langword="null"/> if a JSON null value was found.
+    /// </returns>
+    /// <typeparam name="T">The reference type to read.</typeparam>
+    public static T? GetOptionalObject<T>(this ref Utf8JsonReader reader, JsonSerializerOptions options)
+      where T : class
+      => (reader.TokenType == JsonTokenType.Null) ? null : reader.GetObject<T>(options);
+
     /// <summary>Reads and converts JSON to an 8-bit signed integer, allowing null.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <returns>The 8-bit signed integer that was read, or <see langword="null"/> if a JSON null value was found.</returns>
@@ -244,27 +284,6 @@ namespace MetaBrainz.Common.Json {
     /// </returns>
     public static float? GetOptionalSingle(this ref Utf8JsonReader reader)
       => (reader.TokenType == JsonTokenType.Null) ? (float?) null : reader.GetSingle();
-
-    /// <summary>Reads and converts JSON to an object of type <typeparamref name="T"/>, allowing null.</summary>
-    /// <param name="reader">The reader to use.</param>
-    /// <param name="options">The options to use for deserialization.</param>
-    /// <param name="converter">The specific converter to use for deserialization.</param>
-    /// <returns>
-    /// The object of type <typeparamref name="T"/> that was read, or <see langword="null"/> if a JSON null value was found.
-    /// </returns>
-    /// <typeparam name="T">The reference type to read.</typeparam>
-    public static T? GetOptionalObject<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
-      where T : class
-      => (reader.TokenType == JsonTokenType.Null) ? null : converter.Read(ref reader, typeof(T), options);
-
-    /// <summary>Reads and converts JSON to an appropriate object, allowing null.</summary>
-    /// <param name="reader">The reader to use.</param>
-    /// <param name="options">The options to use for deserialization.</param>
-    /// <returns>
-    /// The object that was read (using <see cref="AnyObjectReader"/>, or <see langword="null"/> if a JSON null value was found.
-    /// </returns>
-    public static object? GetOptionalObject(this ref Utf8JsonReader reader, JsonSerializerOptions options)
-      => (reader.TokenType == JsonTokenType.Null) ? null : AnyObjectReader.Instance.Read(ref reader, typeof(object), options);
 
     /// <summary>Reads and converts JSON to a 16-bit unsigned integer, allowing null.</summary>
     /// <param name="reader">The reader to use.</param>
