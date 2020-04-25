@@ -5,7 +5,7 @@
     <Title>Common JSON Utilities</Title>
     <Description>This package provides JSON-related utility classes used by other MetaBrainz packages.</Description>
     <PackageTags>MetaBrainz JSON</PackageTags>
-    <Version>2.1.0-pre</Version>
+    <Version>3.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup>

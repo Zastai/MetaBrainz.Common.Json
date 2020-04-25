@@ -1,8 +1,22 @@
-# MetaBrainz.Common.Json  [![Build Status](https://img.shields.io/appveyor/build/zastai/metabrainz-common-json)](https://ci.appveyor.com/project/Zastai/metabrainz-common-json) [![NuGet Version](https://img.shields.io/nuget/v/MetaBrainz.Common.Json)](https://www.nuget.org/packages/MetaBrainz.Common.Json)
+# MetaBrainz.Common.Json [![Build Status](https://img.shields.io/appveyor/build/zastai/metabrainz-common-json)](https://ci.appveyor.com/project/Zastai/metabrainz-common-json) [![NuGet Version](https://img.shields.io/nuget/v/MetaBrainz.Common.Json)](https://www.nuget.org/packages/MetaBrainz.Common.Json)
 
 JSON-related helper classes, for use by the other `MetaBrainz.*` packages.
 
 ## Release Notes
+
+### v3.0.0 (2020-04-25)
+
+#### API Additions
+
+- New Extension Method Overload: `JsonUtils.GetObject<T>()` without a specific converter to use
+- New Extension Method Overload: `JsonUtils.GetOptionalObject<T>()` without a specific converter to use
+
+#### API Changes
+
+- JsonBasedObject: this once again has a regular `Dictionary` as `UnhandledProperties`
+  - this allows implementation types to modify the contents after the initial object creation
+  - *this is, unfortunately, a breaking change*
+
 
 ### v2.0.0 (2020-04-24)
 
@@ -53,10 +67,6 @@ JSON-related helper classes, for use by the other `MetaBrainz.*` packages.
   - it has been superseded by `AnyObjectReader`
 - `InterfaceConverter` and `ReadOnlyListOfInterfaceConverter` have been removed
   - the MetaBrainz libraries are switching to custom converters for everything, removing the need for these
-
-#### Other Changes
-
-#### Dependency Updates
 
 
 ### v1.1.1 (2020-04-16)
