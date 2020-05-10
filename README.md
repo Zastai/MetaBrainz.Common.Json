@@ -4,6 +4,12 @@ JSON-related helper classes, for use by the other `MetaBrainz.*` packages.
 
 ## Release Notes
 
+### v3.0.1 (2020-05-10)
+
+This makes the output of `Prettify()` pretty again. Indented writing was previously only enabled in debug builds,
+so essentially never when consuming the NuGet package.
+
+
 ### v3.0.0 (2020-04-25)
 
 #### API Additions
