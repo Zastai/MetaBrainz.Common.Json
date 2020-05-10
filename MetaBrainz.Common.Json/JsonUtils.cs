@@ -69,7 +69,7 @@ namespace MetaBrainz.Common.Json {
     /// </returns>
     public static string Prettify(string json) {
       try {
-        return JsonSerializer.Serialize(JsonDocument.Parse(json).RootElement, JsonUtils.WriterOptions);
+        return JsonSerializer.Serialize(JsonDocument.Parse(json).RootElement, JsonUtils.PrettifyOptions);
       }
       catch {
         return json;
@@ -79,6 +79,13 @@ namespace MetaBrainz.Common.Json {
     #endregion
 
     #region Options
+
+    private static readonly JsonSerializerOptions PrettifyOptions = new JsonSerializerOptions {
+      // @formatter:off
+      IgnoreNullValues = false,
+      WriteIndented    = true,
+      // @formatter:on
+    };
 
     private static readonly JsonSerializerOptions ReaderOptions = JsonUtils.CreateReaderOptions();
 
