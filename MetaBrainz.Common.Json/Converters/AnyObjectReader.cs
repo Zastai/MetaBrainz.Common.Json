@@ -97,7 +97,7 @@ namespace MetaBrainz.Common.Json.Converters {
               dec = decVal;
             else
               dec = null;
-#if NETSTD_GE_2_1 || NETCORE_GE_2_1
+#if NETSTANDARD2_1 || NETCOREAPP2_1 || NETCOREAPP3_1
             if (reader.TryGetDouble(out var floatVal) && double.IsFinite(floatVal))
               fp = floatVal;
             else

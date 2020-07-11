@@ -21,7 +21,7 @@ namespace MetaBrainz.Common.Json {
     #region General Utilities
 
     private static string DecodeUtf8(ReadOnlySpan<byte> bytes) {
-#if NETSTD_GE_2_1 || NETCORE_GE_2_1
+#if NETSTANDARD2_1 || NETCOREAPP2_1 || NETCOREAPP3_1
       return Encoding.UTF8.GetString(bytes);
 #else
       return Encoding.UTF8.GetString(bytes.ToArray());
