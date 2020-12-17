@@ -97,18 +97,18 @@ namespace MetaBrainz.Common.Json.Converters {
               dec = decVal;
             else
               dec = null;
-#if NETSTANDARD2_1 || NETCOREAPP2_1 || NETCOREAPP3_1
-            if (reader.TryGetDouble(out var floatVal) && double.IsFinite(floatVal))
-              fp = floatVal;
-            else
-              fp = null;
-#else
+#if NET472
             if (reader.TryGetDouble(out var floatVal) && !double.IsInfinity(floatVal) && !double.IsNaN(floatVal))
               fp = floatVal;
             else
               fp = null;
+#else
+              if (reader.TryGetDouble(out var floatVal) && double.IsFinite(floatVal))
+                fp = floatVal;
+              else
+                fp = null;
 #endif
-            if (!dec.HasValue && fp.HasValue) // only double worked -> use it
+              if (!dec.HasValue && fp.HasValue) // only double worked -> use it
               return fp;
             if (dec.HasValue && fp.HasValue) {
               // check for a degenerate case: 1E-29 converts successfully to 0.0000000000000000000000000000m
