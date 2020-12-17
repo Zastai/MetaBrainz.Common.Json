@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="MetaBrainz.Build.Sdk/1.0.0-pre.appveyor.14">
+<Project Sdk="MetaBrainz.Build.Sdk">
 
   <PropertyGroup>
     <Title>Common JSON Utilities</Title>
