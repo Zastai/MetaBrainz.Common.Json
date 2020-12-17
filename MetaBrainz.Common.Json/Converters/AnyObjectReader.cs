@@ -12,7 +12,7 @@ namespace MetaBrainz.Common.Json.Converters {
 
     /// <summary>A global instance, for easy use without unnecessary object allocation.</summary>
     /// <remarks>This reader is stateless, so this single instance can be used everywhere.</remarks>
-    public static readonly AnyObjectReader Instance = new AnyObjectReader();
+    public static readonly AnyObjectReader Instance = new();
 
     /// <summary>Reads and converts JSON to the most appropriate .NET framework type.</summary>
     /// <param name="reader">The reader to read from.</param>
