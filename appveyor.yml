@@ -1,10 +1,12 @@
+version: 'Build #{build}'
 image: Visual Studio 2019
 configuration: Debug
+build_script:
+- ps: dotnet restore
+- ps: dotnet build --nologo --no-restore -c:Debug -p:ContinuousIntegrationBuild=true
+- ps: dotnet pack --nologo --no-build
+- ps: Get-ChildItem output/package/*/*.nupkg | % { appveyor PushArtifact $_ }
+after_build:
+- ps: Write-Host "After Build"
 before_build:
-- cmd: dotnet restore
-build:
-  publish_nuget: true
-  publish_nuget_symbols: true
-  use_snupkg_format: true
-  parallel: true
-  verbosity: minimal
+- ps: Write-Host "Before Build"
