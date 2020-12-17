@@ -1,8 +1,5 @@
-version: 3.0.2-appveyor.{build}
 image: Visual Studio 2019
 configuration: Debug
-install:
-- cmd: git submodule update --init --recursive
 before_build:
 - cmd: dotnet restore
 build:
