@@ -337,6 +337,12 @@ namespace MetaBrainz.Common.Json {
       where T : struct
       => (reader.TokenType == JsonTokenType.Null) ? (T?) null : converter.Read(ref reader, typeof(T), options);
 
+    /// <summary>Gets the value for a property name node.</summary>
+    /// <param name="reader">The UTF-8 JSON reader to get the value from.</param>
+    /// <returns>The property name node's value.</returns>
+    public static string GetPropertyName(this ref Utf8JsonReader reader)
+      => reader.GetString() ?? throw new JsonException("Reader returned null for a PropertyName token.");
+
     /// <summary>Decodes the current raw JSON value as a string.</summary>
     /// <param name="reader">The UTF-8 JSON reader to get the raw value from.</param>
     /// <returns>The raw value as a string.</returns>
@@ -350,6 +356,12 @@ namespace MetaBrainz.Common.Json {
         value = JsonUtils.DecodeUtf8(reader.ValueSpan);
       return value;
     }
+
+    /// <summary>Gets the value for a string node.</summary>
+    /// <param name="reader">The UTF-8 JSON reader to get the value from.</param>
+    /// <returns>The string node's value.</returns>
+    public static string GetStringValue(this ref Utf8JsonReader reader)
+      => reader.GetString() ?? throw new JsonException("Reader returned null for a String token.");
 
     /// <summary>
     /// Takes the next JSON token value from the specified reader and parses it as an absolute <see cref="Uri">URI</see>.
@@ -405,9 +417,7 @@ namespace MetaBrainz.Common.Json {
       while (reader.TokenType != JsonTokenType.EndObject) {
         if (reader.TokenType != JsonTokenType.PropertyName)
           throw new JsonException("Expected key value not found.");
-        var key = reader.GetString();
-        if (key is null)
-          throw new JsonException("Reader returned null for PropertyName token.");
+        var key = reader.GetPropertyName();
         reader.Read();
         elements.Add(key, JsonSerializer.Deserialize<TValue>(ref reader, options));
         reader.Read();
@@ -447,9 +457,7 @@ namespace MetaBrainz.Common.Json {
       while (reader.TokenType != JsonTokenType.EndObject) {
         if (reader.TokenType != JsonTokenType.PropertyName)
           throw new JsonException("Expected key value not found.");
-        var key = reader.GetString();
-        if (key is null)
-          throw new JsonException("Reader returned null for PropertyName token.");
+        var key = reader.GetPropertyName();
         reader.Read();
         elements.Add(key, converter.Read(ref reader, typeof(TValue), options));
         reader.Read();

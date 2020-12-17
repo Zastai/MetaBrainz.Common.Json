@@ -129,9 +129,7 @@ namespace MetaBrainz.Common.Json.Converters {
             return dto;
           if (reader.TryGetGuid(out var guid))
             return guid;
-          var text = reader.GetString();
-          if (text is null)
-            throw new JsonException("Reader returned null for a String token.");
+          var text = reader.GetStringValue();
           if (Uri.TryCreate(text, UriKind.Absolute, out var uri))
             return uri;
           // FIXME: Are the other "special" strings we should recognize?
@@ -186,9 +184,7 @@ namespace MetaBrainz.Common.Json.Converters {
           while (reader.TokenType != JsonTokenType.EndObject) {
             if (reader.TokenType != JsonTokenType.PropertyName)
               throw new JsonException($"Expected a JSON object property, but received a {reader.TokenType} token instead.");
-            var prop = reader.GetString();
-            if (prop is null)
-              throw new JsonException("Reader returned null for a PropertyName token.");
+            var prop = reader.GetPropertyName();
             if (obj.ContainsKey(prop))
               throw new JsonException($"Encountered a duplicate JSON object property ('{prop}').");
             reader.Read();
