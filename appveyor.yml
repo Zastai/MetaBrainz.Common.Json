@@ -1,12 +1,9 @@
 version: 'Build #{build}'
 image: Visual Studio 2019
 configuration: Debug
-build_script:
-- ps: dotnet restore
-- ps: dotnet build --nologo --no-restore -c:Debug -p:ContinuousIntegrationBuild=true
-- ps: dotnet pack --nologo --no-build
-- ps: Get-ChildItem output/package/*/*.nupkg | % { appveyor PushArtifact $_ }
-after_build:
-- ps: Write-Host "After Build"
 before_build:
-- ps: Write-Host "Before Build"
+- ps: dotnet restore
+build_script:
+- ps: dotnet pack --nologo --no-restore -c:Debug '-p:Deterministic=true' '-p:ContinuousIntegrationBuild=true'
+after_build:
+- ps: Get-ChildItem output/package/*/*.nupkg | % { appveyor PushArtifact $_ }
