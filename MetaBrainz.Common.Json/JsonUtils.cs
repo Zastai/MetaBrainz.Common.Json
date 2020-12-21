@@ -395,7 +395,7 @@ namespace MetaBrainz.Common.Json {
     /// <c>null</c>.
     /// </returns>
     /// <typeparam name="T">The value type for the dictionary.</typeparam>
-    public static IReadOnlyDictionary<string, T?>? ReadDictionary<T>(this ref Utf8JsonReader reader, JsonSerializerOptions options)
+    public static IReadOnlyDictionary<string, T>? ReadDictionary<T>(this ref Utf8JsonReader reader, JsonSerializerOptions options)
       => reader.ReadDictionary<T, T>(options);
 
     /// <summary>Reads and converts JSON to a (read-only) dictionary.</summary>
@@ -407,19 +407,20 @@ namespace MetaBrainz.Common.Json {
     /// </returns>
     /// <typeparam name="T">The value type for the dictionary.</typeparam>
     /// <typeparam name="TValue">The type to use when deserializing the dictionary values.</typeparam>
-    public static IReadOnlyDictionary<string, T?>? ReadDictionary<T, TValue>(this ref Utf8JsonReader reader, JsonSerializerOptions options) where TValue : T {
+    public static IReadOnlyDictionary<string, T>? ReadDictionary<T, TValue>(this ref Utf8JsonReader reader, JsonSerializerOptions options) where TValue : T {
       if (reader.TokenType == JsonTokenType.Null)
         return null;
       if (reader.TokenType != JsonTokenType.StartObject)
         throw new JsonException("Expected start of dictionary not found.");
       reader.Read();
-      var elements = new Dictionary<string, T?>();
+      var elements = new Dictionary<string, T>();
       while (reader.TokenType != JsonTokenType.EndObject) {
         if (reader.TokenType != JsonTokenType.PropertyName)
           throw new JsonException("Expected key value not found.");
         var key = reader.GetPropertyName();
         reader.Read();
-        elements.Add(key, JsonSerializer.Deserialize<TValue>(ref reader, options));
+        var value = JsonSerializer.Deserialize<TValue>(ref reader, options);
+        elements.Add(key, value ?? throw new JsonException("A dictionary value was null."));
         reader.Read();
       }
       return elements;
@@ -434,7 +435,7 @@ namespace MetaBrainz.Common.Json {
     /// <c>null</c>.
     /// </returns>
     /// <typeparam name="T">The value type for the dictionary.</typeparam>
-    public static IReadOnlyDictionary<string, T?>? ReadDictionary<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
+    public static IReadOnlyDictionary<string, T>? ReadDictionary<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
       => reader.ReadDictionary<T, T>(converter, options);
 
     /// <summary>Reads and converts JSON to a (read-only) dictionary.</summary>
@@ -447,19 +448,20 @@ namespace MetaBrainz.Common.Json {
     /// </returns>
     /// <typeparam name="T">The value type for the dictionary.</typeparam>
     /// <typeparam name="TValue">The type to use when deserializing the dictionary values.</typeparam>
-    public static IReadOnlyDictionary<string, T?>? ReadDictionary<T, TValue>(this ref Utf8JsonReader reader, JsonConverter<TValue> converter, JsonSerializerOptions options) where TValue : T {
+    public static IReadOnlyDictionary<string, T>? ReadDictionary<T, TValue>(this ref Utf8JsonReader reader, JsonConverter<TValue> converter, JsonSerializerOptions options) where TValue : T {
       if (reader.TokenType == JsonTokenType.Null)
         return null;
       if (reader.TokenType != JsonTokenType.StartObject)
         throw new JsonException("Expected start of dictionary not found.");
       reader.Read();
-      var elements = new Dictionary<string, T?>();
+      var elements = new Dictionary<string, T>();
       while (reader.TokenType != JsonTokenType.EndObject) {
         if (reader.TokenType != JsonTokenType.PropertyName)
           throw new JsonException("Expected key value not found.");
         var key = reader.GetPropertyName();
         reader.Read();
-        elements.Add(key, converter.Read(ref reader, typeof(TValue), options));
+        var value = converter.Read(ref reader, typeof(TValue), options);
+        elements.Add(key, value ?? throw new JsonException("A dictionary value was null."));
         reader.Read();
       }
       return elements;
