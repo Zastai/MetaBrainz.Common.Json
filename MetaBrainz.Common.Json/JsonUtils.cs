@@ -472,7 +472,7 @@ namespace MetaBrainz.Common.Json {
     /// A (read-only) list containing the values read, or <see langword="null"/> if the value was specified as <c>null</c>.
     /// </returns>
     /// <typeparam name="T">The element type for the list.</typeparam>
-    public static IReadOnlyList<T?>? ReadList<T>(this ref Utf8JsonReader reader, JsonSerializerOptions options)
+    public static IReadOnlyList<T>? ReadList<T>(this ref Utf8JsonReader reader, JsonSerializerOptions options)
       => reader.ReadList<T, T>(options);
 
     /// <summary>Reads and converts JSON to a (read-only) list.</summary>
@@ -483,7 +483,7 @@ namespace MetaBrainz.Common.Json {
     /// </returns>
     /// <typeparam name="T">The value type for the list.</typeparam>
     /// <typeparam name="TValue">The type to use when deserializing the list values.</typeparam>
-    public static IReadOnlyList<T?>? ReadList<T, TValue>(this ref Utf8JsonReader reader, JsonSerializerOptions options) where TValue : T {
+    public static IReadOnlyList<T>? ReadList<T, TValue>(this ref Utf8JsonReader reader, JsonSerializerOptions options) where TValue : T {
       if (reader.TokenType == JsonTokenType.Null)
         return null;
       if (reader.TokenType != JsonTokenType.StartArray)
@@ -491,10 +491,11 @@ namespace MetaBrainz.Common.Json {
       reader.Read();
       // Shortcut for empty list
       if (reader.TokenType == JsonTokenType.EndArray)
-        return Array.Empty<T?>();
-      var elements = new List<T?>();
+        return Array.Empty<T>();
+      var elements = new List<T>();
       while (reader.TokenType != JsonTokenType.EndArray) {
-        elements.Add(JsonSerializer.Deserialize<TValue>(ref reader, options));
+        var element = JsonSerializer.Deserialize<TValue>(ref reader, options);
+        elements.Add(element ?? throw new JsonException("A list element was null."));
         reader.Read();
       }
       return elements;
@@ -508,7 +509,7 @@ namespace MetaBrainz.Common.Json {
     /// A (read-only) list containing the values read, or <see langword="null"/> if the value was specified as <c>null</c>.
     /// </returns>
     /// <typeparam name="T">The value type for the list.</typeparam>
-    public static IReadOnlyList<T?>? ReadList<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
+    public static IReadOnlyList<T>? ReadList<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
       => reader.ReadList<T, T>(converter, options);
 
     /// <summary>Reads and converts JSON to a (read-only) list.</summary>
@@ -520,7 +521,7 @@ namespace MetaBrainz.Common.Json {
     /// </returns>
     /// <typeparam name="T">The value type for the list.</typeparam>
     /// <typeparam name="TValue">The type to use when deserializing the list values.</typeparam>
-    public static IReadOnlyList<T?>? ReadList<T, TValue>(this ref Utf8JsonReader reader, JsonConverter<TValue> converter, JsonSerializerOptions options) where TValue : T {
+    public static IReadOnlyList<T>? ReadList<T, TValue>(this ref Utf8JsonReader reader, JsonConverter<TValue> converter, JsonSerializerOptions options) where TValue : T {
       if (reader.TokenType == JsonTokenType.Null)
         return null;
       if (reader.TokenType != JsonTokenType.StartArray)
@@ -528,10 +529,11 @@ namespace MetaBrainz.Common.Json {
       reader.Read();
       // Shortcut for empty list
       if (reader.TokenType == JsonTokenType.EndArray)
-        return Array.Empty<T?>();
-      var elements = new List<T?>();
+        return Array.Empty<T>();
+      var elements = new List<T>();
       while (reader.TokenType != JsonTokenType.EndArray) {
-        elements.Add(converter.Read(ref reader, typeof(TValue), options));
+        var element = converter.Read(ref reader, typeof(TValue), options);
+        elements.Add(element ?? throw new JsonException("A list element was null."));
         reader.Read();
       }
       return elements;
