@@ -12,7 +12,7 @@ namespace MetaBrainz.Common.Json.Converters {
 
     /// <summary>A global instance, for easy use without unnecessary object allocation.</summary>
     /// <remarks>This reader is stateless, so this single instance can be used everywhere.</remarks>
-    public static readonly AnyObjectReader Instance = new AnyObjectReader();
+    public static readonly AnyObjectReader Instance = new();
 
     /// <summary>Reads and converts JSON to the most appropriate .NET framework type.</summary>
     /// <param name="reader">The reader to read from.</param>
@@ -97,16 +97,16 @@ namespace MetaBrainz.Common.Json.Converters {
               dec = decVal;
             else
               dec = null;
-#if NETSTANDARD2_1 || NETCOREAPP2_1 || NETCOREAPP3_1
-            if (reader.TryGetDouble(out var floatVal) && double.IsFinite(floatVal))
-              fp = floatVal;
-            else
-              fp = null;
-#else
+#if NETFRAMEWORK // No IsFinite()
             if (reader.TryGetDouble(out var floatVal) && !double.IsInfinity(floatVal) && !double.IsNaN(floatVal))
               fp = floatVal;
             else
               fp = null;
+#else
+              if (reader.TryGetDouble(out var floatVal) && double.IsFinite(floatVal))
+                fp = floatVal;
+              else
+                fp = null;
 #endif
             if (!dec.HasValue && fp.HasValue) // only double worked -> use it
               return fp;
@@ -129,7 +129,7 @@ namespace MetaBrainz.Common.Json.Converters {
             return dto;
           if (reader.TryGetGuid(out var guid))
             return guid;
-          var text = reader.GetString();
+          var text = reader.GetStringValue();
           if (Uri.TryCreate(text, UriKind.Absolute, out var uri))
             return uri;
           // FIXME: Are the other "special" strings we should recognize?
@@ -184,7 +184,7 @@ namespace MetaBrainz.Common.Json.Converters {
           while (reader.TokenType != JsonTokenType.EndObject) {
             if (reader.TokenType != JsonTokenType.PropertyName)
               throw new JsonException($"Expected a JSON object property, but received a {reader.TokenType} token instead.");
-            var prop = reader.GetString();
+            var prop = reader.GetPropertyName();
             if (obj.ContainsKey(prop))
               throw new JsonException($"Encountered a duplicate JSON object property ('{prop}').");
             reader.Read();

@@ -36,28 +36,28 @@ namespace MetaBrainz.Common.Json.Converters {
     /// <param name="reader">The reader to use.</param>
     /// <param name="writer">The writer to use.</param>
     public JsonConverter(TReader reader, TWriter writer) {
-      this._reader = reader;
-      this._writer = writer;
+      this.Reader = reader;
+      this.Writer = writer;
     }
 
-    private readonly TReader _reader;
+    private readonly TReader Reader;
 
-    private readonly TWriter _writer;
+    private readonly TWriter Writer;
 
     /// <summary>Reads and converts JSON to a value of type <typeparamref name="T"/>.</summary>
     /// <param name="reader">The reader to read from.</param>
     /// <param name="typeToConvert">The type of value to convert (ignored; assumed to be <typeparamref name="T"/>).</param>
     /// <param name="options">The options to use for deserialization.</param>
     /// <returns>The value of type <typeparamref name="T"/> that was read and converted.</returns>
-    public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-      => this._reader.Read(ref reader, typeToConvert, options);
+    public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+      => this.Reader.Read(ref reader, typeToConvert, options);
 
     /// <summary>Write a value as JSON.</summary>
     /// <param name="writer">The writer to write to.</param>
     /// <param name="value">The value to write.</param>
     /// <param name="options">The options to use for serialization.</param>
     public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
-      => this._writer.Write(writer, value, options);
+      => this.Writer.Write(writer, value, options);
 
   }
 

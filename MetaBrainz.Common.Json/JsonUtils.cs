@@ -21,10 +21,10 @@ namespace MetaBrainz.Common.Json {
     #region General Utilities
 
     private static string DecodeUtf8(ReadOnlySpan<byte> bytes) {
-#if NETSTANDARD2_1 || NETCOREAPP2_1 || NETCOREAPP3_1
-      return Encoding.UTF8.GetString(bytes);
-#else
+#if NETFRAMEWORK // No Span-based API
       return Encoding.UTF8.GetString(bytes.ToArray());
+#else
+      return Encoding.UTF8.GetString(bytes);
 #endif
     }
 
@@ -33,7 +33,7 @@ namespace MetaBrainz.Common.Json {
     /// <typeparam name="T">The type of object to deserialize.</typeparam>
     /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
     /// <remarks>The options used match those returned by <see cref="CreateReaderOptions()"/>.</remarks>
-    public static T Deserialize<T>(string json)
+    public static T? Deserialize<T>(string json)
       => JsonUtils.Deserialize<T>(json, JsonUtils.ReaderOptions);
 
     /// <summary>Deserializes JSON to an object of the specified type.</summary>
@@ -41,7 +41,7 @@ namespace MetaBrainz.Common.Json {
     /// <param name="options">The options to use for deserialization.</param>
     /// <typeparam name="T">The type of object to deserialize.</typeparam>
     /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
-    public static T Deserialize<T>(string json, JsonSerializerOptions options)
+    public static T? Deserialize<T>(string json, JsonSerializerOptions options)
       => JsonSerializer.Deserialize<T>(json, options);
 
     /// <summary>Deserializes JSON to an object of the specified type, using default options.</summary>
@@ -50,7 +50,7 @@ namespace MetaBrainz.Common.Json {
     /// <param name="cancellationToken">A token that may be used to cancel the read operation.</param>
     /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
     /// <remarks>The options used match those returned by <see cref="CreateReaderOptions()"/>.</remarks>
-    public static ValueTask<T> DeserializeAsync<T>(Stream json, CancellationToken cancellationToken = default)
+    public static ValueTask<T?> DeserializeAsync<T>(Stream json, CancellationToken cancellationToken = default)
       => JsonUtils.DeserializeAsync<T>(json, JsonUtils.ReaderOptions, cancellationToken);
 
     /// <summary>Deserializes JSON to an object of the specified type.</summary>
@@ -59,7 +59,7 @@ namespace MetaBrainz.Common.Json {
     /// <param name="cancellationToken">A token that may be used to cancel the read operation.</param>
     /// <typeparam name="T">The type of object to deserialize.</typeparam>
     /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
-    public static ValueTask<T> DeserializeAsync<T>(Stream json, JsonSerializerOptions options, CancellationToken cancellationToken = default)
+    public static ValueTask<T?> DeserializeAsync<T>(Stream json, JsonSerializerOptions options, CancellationToken cancellationToken = default)
       => JsonSerializer.DeserializeAsync<T>(json, options, cancellationToken);
 
     /// <summary>Pretty-prints a JSON string.</summary>
@@ -80,7 +80,7 @@ namespace MetaBrainz.Common.Json {
 
     #region Options
 
-    private static readonly JsonSerializerOptions PrettifyOptions = new JsonSerializerOptions {
+    private static readonly JsonSerializerOptions PrettifyOptions = new() {
       // @formatter:off
       IgnoreNullValues = false,
       WriteIndented    = true,
@@ -93,7 +93,7 @@ namespace MetaBrainz.Common.Json {
 
     /// <summary>Creates JSON serializer options for reading (deserialization).</summary>
     /// <returns>JSON serializer options for reading (deserialization).</returns>
-    public static JsonSerializerOptions CreateReaderOptions() => new JsonSerializerOptions {
+    public static JsonSerializerOptions CreateReaderOptions() => new() {
       // @formatter:off
       AllowTrailingCommas         = false,
       IgnoreNullValues            = false,
@@ -126,7 +126,7 @@ namespace MetaBrainz.Common.Json {
 
     /// <summary>Creates JSON serializer options for writing (serialization).</summary>
     /// <returns>JSON serializer options for writing (serialization).</returns>
-    public static JsonSerializerOptions CreateWriterOptions() => new JsonSerializerOptions {
+    public static JsonSerializerOptions CreateWriterOptions() => new() {
       // @formatter:off
       IgnoreNullValues         = false,
       IgnoreReadOnlyProperties = false,
@@ -172,7 +172,7 @@ namespace MetaBrainz.Common.Json {
     /// <returns>The object of type <typeparamref name="T"/> that was read.</returns>
     /// <typeparam name="T">The type to read.</typeparam>
     public static T GetObject<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
-      => converter.Read(ref reader, typeof(T), options);
+      => converter.Read(ref reader, typeof(T), options) ?? throw new JsonException("The converter read a null object.");
 
     /// <summary>Reads and converts JSON to an appropriate object.</summary>
     /// <param name="reader">The reader to use.</param>
@@ -187,7 +187,7 @@ namespace MetaBrainz.Common.Json {
     /// <returns>The object of type <typeparamref name="T"/> that was read.</returns>
     /// <typeparam name="T">The type to read.</typeparam>
     public static T GetObject<T>(this ref Utf8JsonReader reader, JsonSerializerOptions options)
-      => JsonSerializer.Deserialize<T>(ref reader, options);
+      => JsonSerializer.Deserialize<T>(ref reader, options) ?? throw new JsonException("A null object was found.");
 
     /// <summary>Reads and converts JSON to a boolean value, allowing null.</summary>
     /// <param name="reader">The reader to use.</param>
@@ -337,6 +337,12 @@ namespace MetaBrainz.Common.Json {
       where T : struct
       => (reader.TokenType == JsonTokenType.Null) ? (T?) null : converter.Read(ref reader, typeof(T), options);
 
+    /// <summary>Gets the value for a property name node.</summary>
+    /// <param name="reader">The UTF-8 JSON reader to get the value from.</param>
+    /// <returns>The property name node's value.</returns>
+    public static string GetPropertyName(this ref Utf8JsonReader reader)
+      => reader.GetString() ?? throw new JsonException("Reader returned null for a PropertyName token.");
+
     /// <summary>Decodes the current raw JSON value as a string.</summary>
     /// <param name="reader">The UTF-8 JSON reader to get the raw value from.</param>
     /// <returns>The raw value as a string.</returns>
@@ -350,6 +356,12 @@ namespace MetaBrainz.Common.Json {
         value = JsonUtils.DecodeUtf8(reader.ValueSpan);
       return value;
     }
+
+    /// <summary>Gets the value for a string node.</summary>
+    /// <param name="reader">The UTF-8 JSON reader to get the value from.</param>
+    /// <returns>The string node's value.</returns>
+    public static string GetStringValue(this ref Utf8JsonReader reader)
+      => reader.GetString() ?? throw new JsonException("Reader returned null for a String token.");
 
     /// <summary>
     /// Takes the next JSON token value from the specified reader and parses it as an absolute <see cref="Uri">URI</see>.
@@ -405,9 +417,10 @@ namespace MetaBrainz.Common.Json {
       while (reader.TokenType != JsonTokenType.EndObject) {
         if (reader.TokenType != JsonTokenType.PropertyName)
           throw new JsonException("Expected key value not found.");
-        var key = reader.GetString();
+        var key = reader.GetPropertyName();
         reader.Read();
-        elements.Add(key, JsonSerializer.Deserialize<TValue>(ref reader, options));
+        var value = JsonSerializer.Deserialize<TValue>(ref reader, options);
+        elements.Add(key, value ?? throw new JsonException("A dictionary value was null."));
         reader.Read();
       }
       return elements;
@@ -445,9 +458,10 @@ namespace MetaBrainz.Common.Json {
       while (reader.TokenType != JsonTokenType.EndObject) {
         if (reader.TokenType != JsonTokenType.PropertyName)
           throw new JsonException("Expected key value not found.");
-        var key = reader.GetString();
+        var key = reader.GetPropertyName();
         reader.Read();
-        elements.Add(key, converter.Read(ref reader, typeof(TValue), options));
+        var value = converter.Read(ref reader, typeof(TValue), options);
+        elements.Add(key, value ?? throw new JsonException("A dictionary value was null."));
         reader.Read();
       }
       return elements;
@@ -482,7 +496,8 @@ namespace MetaBrainz.Common.Json {
         return Array.Empty<T>();
       var elements = new List<T>();
       while (reader.TokenType != JsonTokenType.EndArray) {
-        elements.Add(JsonSerializer.Deserialize<TValue>(ref reader, options));
+        var element = JsonSerializer.Deserialize<TValue>(ref reader, options);
+        elements.Add(element ?? throw new JsonException("A list element was null."));
         reader.Read();
       }
       return elements;
@@ -519,7 +534,8 @@ namespace MetaBrainz.Common.Json {
         return Array.Empty<T>();
       var elements = new List<T>();
       while (reader.TokenType != JsonTokenType.EndArray) {
-        elements.Add(converter.Read(ref reader, typeof(TValue), options));
+        var element = converter.Read(ref reader, typeof(TValue), options);
+        elements.Add(element ?? throw new JsonException("A list element was null."));
         reader.Read();
       }
       return elements;
