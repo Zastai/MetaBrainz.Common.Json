@@ -61,7 +61,10 @@ namespace MetaBrainz.Common.Json.Converters {
     /// <description>
     /// <para>If empty: an <see cref="Array.Empty{T}()">empty array</see> of <see cref="object"/>.</para>
     /// <para>If all elements are the same type (or null, if it's a reference type): an array of that type.</para>
-    /// <para>If all elements are the same value type or <see langword="null"/>: an array of a <see cref="Nullable{T}">nullable version</see> of that value type.</para>
+    /// <para>
+    /// If all elements are the same value type or <see langword="null"/>: an array of a
+    /// <see cref="Nullable{T}">nullable version</see> of that value type.
+    /// </para>
     /// <para>Otherwise: an array of <see cref="object"/>.</para>
     /// </description>
     /// </item>
@@ -81,40 +84,53 @@ namespace MetaBrainz.Common.Json.Converters {
     public override object Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
       switch (reader.TokenType) {
         // Easy cases
-        case JsonTokenType.False: return false;
-        case JsonTokenType.True:  return true;
+        case JsonTokenType.False:
+          return false;
+        case JsonTokenType.True:
+          return true;
         // Cases requiring further deduction
         case JsonTokenType.Number: {
-          if (reader.TryGetInt32(out var i32))
+          if (reader.TryGetInt32(out var i32)) {
             return i32;
-          if (reader.TryGetInt64(out var i64))
+          }
+          if (reader.TryGetInt64(out var i64)) {
             return i64;
+          }
           // FIXME: Could try uint64 too, but that would not be CLSCompliant.
           {
             decimal? dec;
             double? fp;
-            if (reader.TryGetDecimal(out var decVal))
+            if (reader.TryGetDecimal(out var decVal)) {
               dec = decVal;
-            else
+            }
+            else {
               dec = null;
+            }
 #if NETFRAMEWORK || NETSTANDARD2_0 // No IsFinite()
-            if (reader.TryGetDouble(out var floatVal) && !double.IsInfinity(floatVal) && !double.IsNaN(floatVal))
+            if (reader.TryGetDouble(out var floatVal) && !double.IsInfinity(floatVal) && !double.IsNaN(floatVal)) {
               fp = floatVal;
-            else
+            }
+            else {
               fp = null;
+            }
 #else
-              if (reader.TryGetDouble(out var floatVal) && double.IsFinite(floatVal))
-                fp = floatVal;
-              else
-                fp = null;
+            if (reader.TryGetDouble(out var floatVal) && double.IsFinite(floatVal)) {
+              fp = floatVal;
+            }
+            else {
+              fp = null;
+            }
 #endif
-            if (!dec.HasValue && fp.HasValue) // only double worked -> use it
+            if (!dec.HasValue && fp.HasValue) {
+              // only double worked -> use it
               return fp;
+            }
             if (dec.HasValue && fp.HasValue) {
               // check for a degenerate case: 1E-29 converts successfully to 0.0000000000000000000000000000m
               // FIXME: 12E-29 converts to 0.0000000000000000000000000001m and 1.2E-28; ideally, we'd pick the double then too
-              if (dec.Value == 0 && Math.Abs(fp.Value) > double.Epsilon)
+              if (dec.Value == 0 && Math.Abs(fp.Value) > double.Epsilon) {
                 return fp;
+              }
               // otherwise, assume the decimal will be better
               return dec;
             }
@@ -125,20 +141,24 @@ namespace MetaBrainz.Common.Json.Converters {
         }
         case JsonTokenType.String: {
           // Note: NOT TryGetBytesFromBase64() because that has many false positives (e.g. most ISRC values).
-          if (reader.TryGetDateTimeOffset(out var dto))
+          if (reader.TryGetDateTimeOffset(out var dto)) {
             return dto;
-          if (reader.TryGetGuid(out var guid))
+          }
+          if (reader.TryGetGuid(out var guid)) {
             return guid;
+          }
           var text = reader.GetStringValue();
-          if (Uri.TryCreate(text, UriKind.Absolute, out var uri))
+          if (Uri.TryCreate(text, UriKind.Absolute, out var uri)) {
             return uri;
+          }
           // FIXME: Are the other "special" strings we should recognize?
           return text;
         }
         case JsonTokenType.StartArray: {
           reader.Read();
-          if (reader.TokenType == JsonTokenType.EndArray)
+          if (reader.TokenType == JsonTokenType.EndArray) {
             return Array.Empty<object?>();
+          }
           var elements = new List<object?>();
           while (reader.TokenType != JsonTokenType.EndArray) {
             elements.Add((reader.TokenType == JsonTokenType.Null) ? null : this.Read(ref reader, typeToConvert, options));
@@ -156,20 +176,24 @@ namespace MetaBrainz.Common.Json.Converters {
               var t = element.GetType();
               // ignore nullability
               t = Nullable.GetUnderlyingType(t) ?? t;
-              if (elementType == null)
+              if (elementType == null) {
                 elementType = t;
+              }
               else if (elementType != t) {
                 elementType = null;
                 break;
               }
             }
             if (elementType != null) {
-              if (elementType.IsValueType && hasNulls) // make it nullable
+              if (elementType.IsValueType && hasNulls) {
+                // make it nullable
                 elementType = typeof(Nullable<>).MakeGenericType(elementType);
+              }
               var len = elements.Count;
               var typedArray = Array.CreateInstance(elementType, len);
-              for (var i = 0; i < len; ++i)
+              for (var i = 0; i < len; ++i) {
                 typedArray.SetValue(Convert.ChangeType(elements[i], elementType), i);
+              }
               return typedArray;
             }
           }
@@ -182,11 +206,13 @@ namespace MetaBrainz.Common.Json.Converters {
           reader.Read();
           var obj = new Dictionary<string, object?>();
           while (reader.TokenType != JsonTokenType.EndObject) {
-            if (reader.TokenType != JsonTokenType.PropertyName)
+            if (reader.TokenType != JsonTokenType.PropertyName) {
               throw new JsonException($"Expected a JSON object property, but received a {reader.TokenType} token instead.");
+            }
             var prop = reader.GetPropertyName();
-            if (obj.ContainsKey(prop))
+            if (obj.ContainsKey(prop)) {
               throw new JsonException($"Encountered a duplicate JSON object property ('{prop}').");
+            }
             reader.Read();
             obj[prop] = (reader.TokenType == JsonTokenType.Null) ? null : this.Read(ref reader, typeToConvert, options);
             reader.Read();
@@ -196,7 +222,6 @@ namespace MetaBrainz.Common.Json.Converters {
         default:
           throw new JsonException($"Token ({reader.TokenType}: {reader.GetRawStringValue()}) cannot be converted to an object.");
       }
-
     }
 
   }
