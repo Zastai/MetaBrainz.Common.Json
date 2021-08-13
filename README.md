@@ -4,11 +4,35 @@ JSON-related helper classes, for use by the other `MetaBrainz.*` packages.
 
 ## Release Notes
 
+### v4.0.1 (not yet released)
+
+- Changed the license to MIT (from MS-PL)
+- Changed target frameworks to `netstandard2.0`, `netstandard2.1`, and `net472`
+
+#### Dependency Updates
+
+- MetaBrainz.Build.Sdk → 1.0.1
+- JetBrainz.Annotations → 2020.1.0
+- System.Text.Json → 5.0.2
+
+### v4.0.0 (2020-12-23)
+
+- Switch to a NuGet SDK package (MetaBrainz.Build.Sdk) instead of a Git submodule
+
+#### API Additions
+
+- Two non-null variations of `Utf8JsonReader.GetString()` were added:
+  - `GetStringValue()` for `String` nodes
+  - `GetPropertyName()` for `PropertyName` nodes
+
+#### Dependency Updates
+
+- System.Text.Json → 5.0.0
+
 ### v3.0.1 (2020-05-10)
 
-This makes the output of `Prettify()` pretty again. Indented writing was previously only enabled in debug builds,
-so essentially never when consuming the NuGet package.
-
+- This makes the output of `Prettify()` pretty again
+  - Indented writing was previously only enabled in debug builds, so essentially never when consuming the NuGet package
 
 ### v3.0.0 (2020-04-25)
 
@@ -22,7 +46,6 @@ so essentially never when consuming the NuGet package.
 - JsonBasedObject: this once again has a regular `Dictionary` as `UnhandledProperties`
   - this allows implementation types to modify the contents after the initial object creation
   - *this is, unfortunately, a breaking change*
-
 
 ### v2.0.0 (2020-04-24)
 
@@ -74,11 +97,9 @@ so essentially never when consuming the NuGet package.
 - `InterfaceConverter` and `ReadOnlyListOfInterfaceConverter` have been removed
   - the MetaBrainz libraries are switching to custom converters for everything, removing the need for these
 
-
 ### v1.1.1 (2020-04-16)
 
 This version fixes a build issue causing the XML documentation to be missing from the NuGet package.
-
 
 ### v1.1.0 (2020-04-15)
 
@@ -112,14 +133,13 @@ This version fixes a build issue causing the XML documentation to be missing fro
 
 #### Other Changes
 
-- tweaks and updates to the build system
-- marked more types as `[PublicAPI]` (dev-time change only)
+- Tweaks and updates to the build system
+- Marked more types as `[PublicAPI]` (dev-time change only)
 
 #### Dependency Updates
 
 - JetBrainz.Annotations → 2020.1.0
 - System.Text.Json → 4.7.1
-
 
 ### v1.0.0 (2020-03-20)
 
