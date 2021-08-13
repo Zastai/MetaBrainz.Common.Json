@@ -21,7 +21,7 @@ namespace MetaBrainz.Common.Json {
     #region General Utilities
 
     private static string DecodeUtf8(ReadOnlySpan<byte> bytes) {
-#if NETFRAMEWORK // No Span-based API
+#if NETFRAMEWORK || NETSTANDARD2_0 // No Span-based API
       return Encoding.UTF8.GetString(bytes.ToArray());
 #else
       return Encoding.UTF8.GetString(bytes);

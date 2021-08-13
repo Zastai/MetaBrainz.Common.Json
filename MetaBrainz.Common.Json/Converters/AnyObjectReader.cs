@@ -97,7 +97,7 @@ namespace MetaBrainz.Common.Json.Converters {
               dec = decVal;
             else
               dec = null;
-#if NETFRAMEWORK // No IsFinite()
+#if NETFRAMEWORK || NETSTANDARD2_0 // No IsFinite()
             if (reader.TryGetDouble(out var floatVal) && !double.IsInfinity(floatVal) && !double.IsNaN(floatVal))
               fp = floatVal;
             else
