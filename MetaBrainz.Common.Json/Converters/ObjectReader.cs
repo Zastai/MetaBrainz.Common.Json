@@ -16,12 +16,14 @@ namespace MetaBrainz.Common.Json.Converters {
     /// <param name="options">The options to use for deserialization.</param>
     /// <returns>The object of type <typeparamref name="T"/> that was read and converted.</returns>
     public sealed override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
-      if (reader.TokenType != JsonTokenType.StartObject)
+      if (reader.TokenType != JsonTokenType.StartObject) {
         throw new JsonException("Expected start of object not found.");
+      }
       reader.Read();
       var obj = this.ReadObjectContents(ref reader, options);
-      if (reader.TokenType != JsonTokenType.EndObject)
+      if (reader.TokenType != JsonTokenType.EndObject) {
         throw new JsonException("Expected end of object not found.");
+      }
       return obj;
     }
 
