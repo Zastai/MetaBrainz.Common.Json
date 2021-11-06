@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Title>Common JSON Utilities</Title>
     <Description>This package provides JSON-related utility classes used by other MetaBrainz packages.</Description>
-    <PackageCopyrightYears>2020</PackageCopyrightYears>
+    <PackageCopyrightYears>2020, 2021</PackageCopyrightYears>
     <PackageRepositoryName>MetaBrainz.Common.Json</PackageRepositoryName>
     <PackageTags>MetaBrainz JSON</PackageTags>
-    <Version>4.0.1-pre</Version>
+    <Version>4.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
