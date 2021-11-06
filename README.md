@@ -4,15 +4,17 @@ JSON-related helper classes, for use by the other `MetaBrainz.*` packages.
 
 ## Release Notes
 
-### v4.0.1 (not yet released)
+### v4.0.2 (not yet released)
+
+### v4.0.1 (2021-11-06)
 
 - Changed the license to MIT (from MS-PL)
 - Changed target frameworks to `netstandard2.0`, `netstandard2.1`, and `net472`
 
 #### Dependency Updates
 
+- JetBrainz.Annotations → 2021.3.0
 - MetaBrainz.Build.Sdk → 1.0.1
-- JetBrainz.Annotations → 2020.1.0
 - System.Text.Json → 5.0.2
 
 ### v4.0.0 (2020-12-23)
