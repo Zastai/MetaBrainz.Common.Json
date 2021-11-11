@@ -83,7 +83,7 @@ namespace MetaBrainz.Common.Json {
     #region Options
 
     private static readonly JsonSerializerOptions PrettifyOptions = new() {
-      IgnoreNullValues = false,
+      DefaultIgnoreCondition = JsonIgnoreCondition.Never,
       WriteIndented = true,
     };
 
@@ -95,7 +95,7 @@ namespace MetaBrainz.Common.Json {
     /// <returns>JSON serializer options for reading (deserialization).</returns>
     public static JsonSerializerOptions CreateReaderOptions() => new() {
       AllowTrailingCommas = false,
-      IgnoreNullValues = false,
+      DefaultIgnoreCondition = JsonIgnoreCondition.Never,
       PropertyNameCaseInsensitive = false,
     };
 
@@ -126,7 +126,7 @@ namespace MetaBrainz.Common.Json {
     /// <summary>Creates JSON serializer options for writing (serialization).</summary>
     /// <returns>JSON serializer options for writing (serialization).</returns>
     public static JsonSerializerOptions CreateWriterOptions() => new() {
-      IgnoreNullValues = false,
+      DefaultIgnoreCondition = JsonIgnoreCondition.Never,
       IgnoreReadOnlyProperties = false,
 #if DEBUG
       WriteIndented = true,
