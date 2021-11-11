@@ -19,7 +19,7 @@ categories:
       - enhancement
       - feature
   - title: 🐛 Bug Fixes
-    labels: fix
+    label: fix
   - title: 📦 Dependency Updates
     label: dependencies # Used by Dependabot
   - title: 📝 Documentation Updates
