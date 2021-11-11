@@ -6,6 +6,8 @@ JSON-related helper classes, for use by the other `MetaBrainz.*` packages.
 
 ### v4.0.2 (not yet released)
 
+- System.Text.Json → 6.0.0
+
 ### v4.0.1 (2021-11-06)
 
 - Changed the license to MIT (from MS-PL)
