@@ -6,6 +6,11 @@ JSON-related helper classes, for use by the other `MetaBrainz.*` packages.
 
 ### v4.0.2 (not yet released)
 
+- Changed target frameworks to `net6.0`, `netstandard2.1`, `netstandard2.0`, and `net48`
+
+#### Dependency Updates
+
+- MetaBrainz.Build.Sdk → 2.0.0
 - System.Text.Json → 6.0.0
 
 ### v4.0.1 (2021-11-06)
