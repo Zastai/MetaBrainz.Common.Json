@@ -2,18 +2,16 @@ using System.Collections.Generic;
 
 using JetBrains.Annotations;
 
-namespace MetaBrainz.Common.Json {
+namespace MetaBrainz.Common.Json;
 
-  /// <summary>An object based on a JSON string (as returned by web services).</summary>
-  [PublicAPI]
-  public interface IJsonBasedObject {
+/// <summary>An object based on a JSON string (as returned by web services).</summary>
+[PublicAPI]
+public interface IJsonBasedObject {
 
-    /// <summary>
-    /// A dictionary containing all properties not otherwise handled.
-    /// This should be <see langword="null"/>; if it's not, please file a ticket, listing its contents.
-    /// </summary>
-    IReadOnlyDictionary<string, object?>? UnhandledProperties { get; }
-
-  }
+  /// <summary>
+  /// A dictionary containing all properties not otherwise handled.
+  /// This should be <see langword="null"/>; if it's not, please file a ticket, listing its contents.
+  /// </summary>
+  IReadOnlyDictionary<string, object?>? UnhandledProperties { get; }
 
 }
