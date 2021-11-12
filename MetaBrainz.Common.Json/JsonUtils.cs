@@ -278,7 +278,6 @@ namespace MetaBrainz.Common.Json {
     /// <summary>Reads and converts JSON to an 8-bit signed integer, allowing null.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <returns>The 8-bit signed integer that was read, or <see langword="null"/> if a JSON null value was found.</returns>
-    [CLSCompliant(false)]
     public static sbyte? GetOptionalSByte(this ref Utf8JsonReader reader)
       => reader.TokenType == JsonTokenType.Null ? null : reader.GetSByte();
 
@@ -293,21 +292,18 @@ namespace MetaBrainz.Common.Json {
     /// <summary>Reads and converts JSON to a 16-bit unsigned integer, allowing null.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <returns>The 16-bit unsigned integer that was read, or <see langword="null"/> if a JSON null value was found.</returns>
-    [CLSCompliant(false)]
     public static ushort? GetOptionalUInt16(this ref Utf8JsonReader reader)
       => reader.TokenType == JsonTokenType.Null ? null : reader.GetUInt16();
 
     /// <summary>Reads and converts JSON to a 32-bit unsigned integer, allowing null.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <returns>The 32-bit unsigned integer that was read, or <see langword="null"/> if a JSON null value was found.</returns>
-    [CLSCompliant(false)]
     public static uint? GetOptionalUInt32(this ref Utf8JsonReader reader)
       => reader.TokenType == JsonTokenType.Null ? null : reader.GetUInt32();
 
     /// <summary>Reads and converts JSON to a 64-bit unsigned integer, allowing null.</summary>
     /// <param name="reader">The reader to use.</param>
     /// <returns>The 64-bit unsigned integer that was read, or <see langword="null"/> if a JSON null value was found.</returns>
-    [CLSCompliant(false)]
     public static ulong? GetOptionalUInt64(this ref Utf8JsonReader reader)
       => reader.TokenType == JsonTokenType.Null ? null : reader.GetUInt64();
 
