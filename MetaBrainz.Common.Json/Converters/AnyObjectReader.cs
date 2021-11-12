@@ -96,7 +96,9 @@ namespace MetaBrainz.Common.Json.Converters {
           if (reader.TryGetInt64(out var i64)) {
             return i64;
           }
-          // FIXME: Could try uint64 too, but that would not be CLSCompliant.
+          if (reader.TryGetUInt64(out var ui64)) {
+            return ui64;
+          }
           {
             decimal? dec;
             double? fp;
