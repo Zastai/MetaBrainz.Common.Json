@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" IncludeAssets="compile" PrivateAssets="all" />
+    <PackageReference Include="MetaBrainz.Common" />
     <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
