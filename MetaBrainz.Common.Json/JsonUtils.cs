@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -51,6 +54,83 @@ public static class JsonUtils {
   public static ValueTask<T?> DeserializeAsync<T>(Stream json, JsonSerializerOptions options,
                                                   CancellationToken cancellationToken = default)
     => JsonSerializer.DeserializeAsync<T>(json, options, cancellationToken);
+
+  /// <summary>Deserializes an object from the JSON content of an HTTP response.</summary>
+  /// <param name="response">The response to process.</param>
+  /// <typeparam name="T">The specific type to deserialize.</typeparam>
+  /// <returns>The deserialized object.</returns>
+  /// <exception cref="JsonException">
+  /// When an object of type <typeparamref name="T"/> could not be deserialized from the contents of <paramref name="response"/>.
+  /// </exception>
+  /// <remarks>The options used match those returned by <see cref="CreateReaderOptions()"/>.</remarks>
+  public static T GetJsonContent<T>(HttpResponseMessage response)
+    => AsyncUtils.ResultOf(JsonUtils.GetJsonContentAsync<T>(response));
+
+  /// <summary>Deserializes an object from the JSON content of an HTTP response.</summary>
+  /// <param name="response">The response to process.</param>
+  /// <param name="options">The JSON serializer options to apply.</param>
+  /// <typeparam name="T">The specific type to deserialize.</typeparam>
+  /// <returns>The deserialized object.</returns>
+  /// <exception cref="JsonException">
+  /// When an object of type <typeparamref name="T"/> could not be deserialized from the contents of <paramref name="response"/>.
+  /// </exception>
+  public static T GetJsonContent<T>(HttpResponseMessage response, JsonSerializerOptions options)
+    => AsyncUtils.ResultOf(JsonUtils.GetJsonContentAsync<T>(response, options));
+
+  /// <summary>Deserializes an object from the JSON content of an HTTP response.</summary>
+  /// <param name="response">The response to process.</param>
+  /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
+  /// <typeparam name="T">The specific type to deserialize.</typeparam>
+  /// <returns>The deserialized object.</returns>
+  /// <exception cref="JsonException">
+  /// When an object of type <typeparamref name="T"/> could not be deserialized from the contents of <paramref name="response"/>.
+  /// </exception>
+  /// <remarks>The options used match those returned by <see cref="CreateReaderOptions()"/>.</remarks>
+  public static Task<T> GetJsonContentAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken = default)
+    => JsonUtils.GetJsonContentAsync<T>(response, JsonUtils.ReaderOptions, cancellationToken);
+
+  /// <summary>Deserializes an object from the JSON content of an HTTP response.</summary>
+  /// <param name="response">The response to process.</param>
+  /// <param name="options">The JSON serializer options to apply.</param>
+  /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
+  /// <typeparam name="T">The specific type to deserialize.</typeparam>
+  /// <returns>The deserialized object.</returns>
+  /// <exception cref="JsonException">
+  /// When an object of type <typeparamref name="T"/> could not be deserialized from the contents of <paramref name="response"/>.
+  /// </exception>
+  public static async Task<T> GetJsonContentAsync<T>(HttpResponseMessage response, JsonSerializerOptions options,
+                                                     CancellationToken cancellationToken = default) {
+    var content = response.Content;
+    Debug.Print($"[{DateTime.UtcNow}] => RESPONSE ({content.Headers.ContentType}): {content.Headers.ContentLength} bytes");
+#if NET
+    var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+    await using var _ = stream.ConfigureAwait(false);
+#elif NETSTANDARD2_1_OR_GREATER
+    var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+    await using var _ = stream.ConfigureAwait(false);
+#else
+    using var stream = await content.ReadAsStreamAsync().ConfigureAwait(false);
+#endif
+    if (stream is null || stream.Length == 0) {
+      throw new JsonException("No content received.");
+    }
+    var characterSet = HttpUtils.GetContentEncoding(content.Headers);
+#if !DEBUG
+    if (characterSet == "utf-8") { // Directly use the stream
+      var jsonObject = await JsonUtils.DeserializeAsync<T>(stream, options, cancellationToken).ConfigureAwait(false);
+      return jsonObject ?? throw new JsonException("The received content was null.");
+    }
+#endif
+    var enc = Encoding.GetEncoding(characterSet);
+    using var sr = new StreamReader(stream, enc, false, 1024, true);
+    // This is not (yet?) cancelable
+    var json = await sr.ReadToEndAsync().ConfigureAwait(false);
+    Debug.Print($"[{DateTime.UtcNow}] => JSON: {JsonUtils.Prettify(json)}");
+    {
+      var jsonObject = JsonUtils.Deserialize<T>(json, options);
+      return jsonObject ?? throw new JsonException("The received content was null.");
+    }
+  }
 
   /// <summary>Pretty-prints a JSON string.</summary>
   /// <param name="json">The JSON string to pretty-print.</param>
