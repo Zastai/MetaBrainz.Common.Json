@@ -162,14 +162,14 @@ public sealed class AnyObjectReader : JsonReader<object> {
           Type? elementType = null;
           var hasNulls = false;
           foreach (var element in elements) {
-            if (element == null) {
+            if (element is null) {
               hasNulls = true;
               continue;
             }
             var t = element.GetType();
             // ignore nullability
             t = Nullable.GetUnderlyingType(t) ?? t;
-            if (elementType == null) {
+            if (elementType is null) {
               elementType = t;
             }
             else if (elementType != t) {
@@ -177,7 +177,7 @@ public sealed class AnyObjectReader : JsonReader<object> {
               break;
             }
           }
-          if (elementType != null) {
+          if (elementType is not null) {
             if (elementType.IsValueType && hasNulls) {
               // make it nullable
               elementType = typeof(Nullable<>).MakeGenericType(elementType);

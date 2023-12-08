@@ -14,7 +14,8 @@ public abstract class ObjectWriter<T> : JsonWriter<T> {
   /// <param name="value">The value to write.</param>
   /// <param name="options">The options to use for serialization.</param>
   public sealed override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options) {
-    if (value == null) { // Will never be the case for normal JsonSerializer processing, but handle it anyway.
+    if (value is null) {
+      // Will never be the case for normal JsonSerializer processing, but handle it anyway.
       writer.WriteNullValue();
       return;
     }
