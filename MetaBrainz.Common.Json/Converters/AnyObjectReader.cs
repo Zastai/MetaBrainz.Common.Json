@@ -108,21 +108,12 @@ public sealed class AnyObjectReader : JsonReader<object> {
           else {
             dec = null;
           }
-#if NETFRAMEWORK || NETSTANDARD2_0 // No IsFinite()
-          if (reader.TryGetDouble(out var floatVal) && !double.IsInfinity(floatVal) && !double.IsNaN(floatVal)) {
-            fp = floatVal;
-          }
-          else {
-            fp = null;
-          }
-#else
           if (reader.TryGetDouble(out var floatVal) && double.IsFinite(floatVal)) {
             fp = floatVal;
           }
           else {
             fp = null;
           }
-#endif
           if (!dec.HasValue && fp.HasValue) {
             // only double worked -> use it
             return fp;

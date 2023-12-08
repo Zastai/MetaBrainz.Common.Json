@@ -102,15 +102,8 @@ public static class JsonUtils {
                                                      CancellationToken cancellationToken = default) {
     var content = response.Content;
     Debug.Print($"[{DateTime.UtcNow}] => RESPONSE ({content.Headers.ContentType}): {content.Headers.ContentLength} bytes");
-#if NET
     var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
     await using var _ = stream.ConfigureAwait(false);
-#elif NETSTANDARD2_1_OR_GREATER
-    var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-    await using var _ = stream.ConfigureAwait(false);
-#else
-    using var stream = await content.ReadAsStreamAsync().ConfigureAwait(false);
-#endif
     if (stream is null || stream.Length == 0) {
       throw new JsonException("No content received.");
     }
@@ -123,8 +116,11 @@ public static class JsonUtils {
 #endif
     var enc = Encoding.GetEncoding(characterSet);
     using var sr = new StreamReader(stream, enc, false, 1024, true);
-    // This is not (yet?) cancelable
+#if NET6_0
     var json = await sr.ReadToEndAsync().ConfigureAwait(false);
+#else
+    var json = await sr.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+#endif
     Debug.Print($"[{DateTime.UtcNow}] => JSON: {JsonUtils.Prettify(json)}");
     {
       var jsonObject = JsonUtils.Deserialize<T>(json, options);
