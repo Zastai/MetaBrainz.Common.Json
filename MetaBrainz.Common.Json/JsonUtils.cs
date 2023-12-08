@@ -102,15 +102,8 @@ public static class JsonUtils {
                                                      CancellationToken cancellationToken = default) {
     var content = response.Content;
     Debug.Print($"[{DateTime.UtcNow}] => RESPONSE ({content.Headers.ContentType}): {content.Headers.ContentLength} bytes");
-#if NET
     var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
     await using var _ = stream.ConfigureAwait(false);
-#elif NETSTANDARD2_1_OR_GREATER
-    var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-    await using var _ = stream.ConfigureAwait(false);
-#else
-    using var stream = await content.ReadAsStreamAsync().ConfigureAwait(false);
-#endif
     if (stream is null || stream.Length == 0) {
       throw new JsonException("No content received.");
     }
@@ -123,8 +116,11 @@ public static class JsonUtils {
 #endif
     var enc = Encoding.GetEncoding(characterSet);
     using var sr = new StreamReader(stream, enc, false, 1024, true);
-    // This is not (yet?) cancelable
+#if NET6_0
     var json = await sr.ReadToEndAsync().ConfigureAwait(false);
+#else
+    var json = await sr.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+#endif
     Debug.Print($"[{DateTime.UtcNow}] => JSON: {JsonUtils.Prettify(json)}");
     {
       var jsonObject = JsonUtils.Deserialize<T>(json, options);
@@ -320,7 +316,7 @@ public static class JsonUtils {
   /// </returns>
   /// <typeparam name="T">The reference type to read.</typeparam>
   public static T? GetOptionalObject<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
-    where T : class
+  where T : class
     => reader.TokenType == JsonTokenType.Null ? null : reader.GetObject(converter, options);
 
   /// <summary>Reads and converts JSON to an appropriate object, allowing null.</summary>
@@ -395,7 +391,7 @@ public static class JsonUtils {
   /// </returns>
   /// <typeparam name="T">The value type to read.</typeparam>
   public static T? GetOptionalValue<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
-    where T : struct
+  where T : struct
     => reader.TokenType == JsonTokenType.Null ? null : converter.Read(ref reader, typeof(T), options);
 
   /// <summary>Gets the value for a property name node.</summary>
@@ -449,7 +445,7 @@ public static class JsonUtils {
   /// <returns>The value of type <typeparamref name="T"/> that was read.</returns>
   /// <typeparam name="T">The value type to read.</typeparam>
   public static T GetValue<T>(this ref Utf8JsonReader reader, JsonConverter<T> converter, JsonSerializerOptions options)
-    where T : struct
+  where T : struct
     => converter.Read(ref reader, typeof(T), options);
 
   /// <summary>Reads and converts JSON to a (read-only) dictionary.</summary>
@@ -473,7 +469,8 @@ public static class JsonUtils {
   /// <typeparam name="T">The value type for the dictionary.</typeparam>
   /// <typeparam name="TValue">The type to use when deserializing the dictionary values.</typeparam>
   public static IReadOnlyDictionary<string, T>? ReadDictionary<T, TValue>(this ref Utf8JsonReader reader,
-                                                                          JsonSerializerOptions options) where TValue : T {
+                                                                          JsonSerializerOptions options)
+  where TValue : T {
     if (reader.TokenType == JsonTokenType.Null) {
       return null;
     }
@@ -520,7 +517,8 @@ public static class JsonUtils {
   /// <typeparam name="TValue">The type to use when deserializing the dictionary values.</typeparam>
   public static IReadOnlyDictionary<string, T>? ReadDictionary<T, TValue>(this ref Utf8JsonReader reader,
                                                                           JsonConverter<TValue> converter,
-                                                                          JsonSerializerOptions options) where TValue : T {
+                                                                          JsonSerializerOptions options)
+  where TValue : T {
     if (reader.TokenType == JsonTokenType.Null) {
       return null;
     }
@@ -561,7 +559,7 @@ public static class JsonUtils {
   /// <typeparam name="T">The value type for the list.</typeparam>
   /// <typeparam name="TValue">The type to use when deserializing the list values.</typeparam>
   public static IReadOnlyList<T>? ReadList<T, TValue>(this ref Utf8JsonReader reader, JsonSerializerOptions options)
-    where TValue : T {
+  where TValue : T {
     if (reader.TokenType == JsonTokenType.Null) {
       return null;
     }
@@ -604,7 +602,8 @@ public static class JsonUtils {
   /// <typeparam name="T">The value type for the list.</typeparam>
   /// <typeparam name="TValue">The type to use when deserializing the list values.</typeparam>
   public static IReadOnlyList<T>? ReadList<T, TValue>(this ref Utf8JsonReader reader, JsonConverter<TValue> converter,
-                                                      JsonSerializerOptions options) where TValue : T {
+                                                      JsonSerializerOptions options)
+  where TValue : T {
     if (reader.TokenType == JsonTokenType.Null) {
       return null;
     }
@@ -664,7 +663,7 @@ public static class JsonUtils {
   /// <typeparam name="TConverter">The specific type used by the converter.</typeparam>
   public static void WriteList<TList, TConverter>(this Utf8JsonWriter writer, IEnumerable<TList> values,
                                                   JsonConverter<TConverter> converter, JsonSerializerOptions options)
-    where TList : TConverter {
+  where TList : TConverter {
     writer.WriteStartArray();
     foreach (var value in values) {
       converter.Write(writer, value, options);
@@ -697,7 +696,7 @@ public static class JsonUtils {
   /// <typeparam name="TConverter">The specific type used by the converter.</typeparam>
   public static async Task WriteListAsync<TList, TConverter>(this Utf8JsonWriter writer, IAsyncEnumerable<TList> values,
                                                              JsonConverter<TConverter> converter, JsonSerializerOptions options)
-    where TList : TConverter {
+  where TList : TConverter {
     writer.WriteStartArray();
     await foreach (var value in values) {
       converter.Write(writer, value, options);

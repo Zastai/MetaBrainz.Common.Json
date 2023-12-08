@@ -108,21 +108,12 @@ public sealed class AnyObjectReader : JsonReader<object> {
           else {
             dec = null;
           }
-#if NETFRAMEWORK || NETSTANDARD2_0 // No IsFinite()
-          if (reader.TryGetDouble(out var floatVal) && !double.IsInfinity(floatVal) && !double.IsNaN(floatVal)) {
-            fp = floatVal;
-          }
-          else {
-            fp = null;
-          }
-#else
           if (reader.TryGetDouble(out var floatVal) && double.IsFinite(floatVal)) {
             fp = floatVal;
           }
           else {
             fp = null;
           }
-#endif
           if (!dec.HasValue && fp.HasValue) {
             // only double worked -> use it
             return fp;
@@ -171,14 +162,14 @@ public sealed class AnyObjectReader : JsonReader<object> {
           Type? elementType = null;
           var hasNulls = false;
           foreach (var element in elements) {
-            if (element == null) {
+            if (element is null) {
               hasNulls = true;
               continue;
             }
             var t = element.GetType();
             // ignore nullability
             t = Nullable.GetUnderlyingType(t) ?? t;
-            if (elementType == null) {
+            if (elementType is null) {
               elementType = t;
             }
             else if (elementType != t) {
@@ -186,7 +177,7 @@ public sealed class AnyObjectReader : JsonReader<object> {
               break;
             }
           }
-          if (elementType != null) {
+          if (elementType is not null) {
             if (elementType.IsValueType && hasNulls) {
               // make it nullable
               elementType = typeof(Nullable<>).MakeGenericType(elementType);
