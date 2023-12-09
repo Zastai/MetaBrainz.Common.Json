@@ -107,7 +107,7 @@ public static class JsonUtils {
     if (stream is null || stream.Length == 0) {
       throw new JsonException("No content received.");
     }
-    var characterSet = HttpUtils.GetContentEncoding(content.Headers);
+    var characterSet = content.Headers.GetContentEncoding();
 #if !DEBUG
     if (characterSet == "utf-8") { // Directly use the stream
       var jsonObject = await JsonUtils.DeserializeAsync<T>(stream, options, cancellationToken).ConfigureAwait(false);
@@ -407,11 +407,11 @@ public static class JsonUtils {
     var value = "";
     if (reader.HasValueSequence) {
       foreach (var memory in reader.ValueSequence) {
-        value += TextUtils.DecodeUtf8(memory.Span);
+        value += Encoding.UTF8.GetString(memory.Span);
       }
     }
     else {
-      value = TextUtils.DecodeUtf8(reader.ValueSpan);
+      value = Encoding.UTF8.GetString(reader.ValueSpan);
     }
     return value;
   }
