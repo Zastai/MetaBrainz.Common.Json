@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -101,31 +102,30 @@ public static class JsonUtils {
   public static async Task<T> GetJsonContentAsync<T>(HttpResponseMessage response, JsonSerializerOptions options,
                                                      CancellationToken cancellationToken = default) {
     var content = response.Content;
-    Debug.Print($"[{DateTime.UtcNow}] => RESPONSE ({content.Headers.ContentType}): {content.Headers.ContentLength} bytes");
+    JsonUtils.ShowReceivedHeaders?.Invoke(content.Headers);
     var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
     await using var _ = stream.ConfigureAwait(false);
     if (stream is null || stream.Length == 0) {
       throw new JsonException("No content received.");
     }
     var characterSet = content.Headers.GetContentEncoding();
-#if !DEBUG
-    if (characterSet == "utf-8") { // Directly use the stream
-      var jsonObject = await JsonUtils.DeserializeAsync<T>(stream, options, cancellationToken).ConfigureAwait(false);
-      return jsonObject ?? throw new JsonException("The received content was null.");
+    T? result;
+    if (characterSet.ToLowerInvariant() == "utf-8" && JsonUtils.ShowReceivedJson is null) {
+      // Directly use the stream
+      result = await JsonUtils.DeserializeAsync<T>(stream, options, cancellationToken).ConfigureAwait(false);
     }
-#endif
-    var enc = Encoding.GetEncoding(characterSet);
-    using var sr = new StreamReader(stream, enc, false, 1024, true);
+    else {
+      var enc = Encoding.GetEncoding(characterSet);
+      using var sr = new StreamReader(stream, enc, false, 1024, true);
 #if NET6_0
-    var json = await sr.ReadToEndAsync().ConfigureAwait(false);
+      var json = await sr.ReadToEndAsync().ConfigureAwait(false);
 #else
-    var json = await sr.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+      var json = await sr.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
 #endif
-    Debug.Print($"[{DateTime.UtcNow}] => JSON: {JsonUtils.Prettify(json)}");
-    {
-      var jsonObject = JsonUtils.Deserialize<T>(json, options);
-      return jsonObject ?? throw new JsonException("The received content was null.");
+      JsonUtils.ShowReceivedJson?.Invoke(json);
+      result = JsonUtils.Deserialize<T>(json, options);
     }
+    return result ?? throw new JsonException("The received content was null.");
   }
 
   /// <summary>Pretty-prints a JSON string.</summary>
@@ -142,6 +142,22 @@ public static class JsonUtils {
     }
   }
 
+  /// <summary>
+  /// The action to use to show received HTTP headers.<br/>
+  /// When set, the methods that process JSON response content will pass the response headers to this action.
+  /// </summary>
+  public static Action<HttpContentHeaders>? ShowReceivedHeaders { get; set; }
+
+  /// <summary>
+  /// The action to use to show received JSON.<br/>
+  /// When set, the methods that process JSON response content will pass it to this action before deserializing it.
+  /// </summary>
+  /// <remarks>
+  /// For a UTF-8 JSON response, the performance of the content processing will be better without this set (because then the
+  /// deserialization can use the raw UTF-8 bytes without needing to create a string first).
+  /// </remarks>
+  public static Action<string>? ShowReceivedJson { get; set; }
+
   #endregion
 
   #region Options
@@ -153,7 +169,11 @@ public static class JsonUtils {
 
   private static readonly JsonSerializerOptions ReaderOptions = JsonUtils.CreateReaderOptions();
 
-  private static readonly JsonSerializerOptions WriterOptions = JsonUtils.CreateWriterOptions();
+  /// <summary>
+  /// Indicates whether the options created via <see cref="CreateWriterOptions()"/> and its overloads have the
+  /// <see cref="JsonSerializerOptions.WriteIndented"/> property set to <see langword="true"/> by default.
+  /// </summary>
+  public static bool WriteIndentedByDefault { get; set; }
 
   /// <summary>Creates JSON serializer options for reading (deserialization).</summary>
   /// <returns>JSON serializer options for reading (deserialization).</returns>
@@ -192,11 +212,7 @@ public static class JsonUtils {
   public static JsonSerializerOptions CreateWriterOptions() => new() {
     DefaultIgnoreCondition = JsonIgnoreCondition.Never,
     IgnoreReadOnlyProperties = false,
-#if DEBUG
-    WriteIndented = true,
-#else
-    WriteIndented = false,
-#endif
+    WriteIndented = JsonUtils.WriteIndentedByDefault,
   };
 
   /// <summary>Creates JSON serializer options for writing (serialization).</summary>

@@ -41,6 +41,21 @@ public abstract class JsonBasedObject : IJsonBasedObject {
 ```cs
 public static class JsonUtils {
 
+  System.Action<System.Net.Http.Headers.HttpContentHeaders>? ShowReceivedHeaders {
+    public static get;
+    public static set;
+  }
+
+  System.Action<string>? ShowReceivedJson {
+    public static get;
+    public static set;
+  }
+
+  bool WriteIndentedByDefault {
+    public static get;
+    public static set;
+  }
+
   public static System.Text.Json.JsonSerializerOptions CreateReaderOptions();
 
   public static System.Text.Json.JsonSerializerOptions CreateReaderOptions(System.Collections.Generic.IEnumerable<System.Text.Json.Serialization.JsonConverter> readers);
