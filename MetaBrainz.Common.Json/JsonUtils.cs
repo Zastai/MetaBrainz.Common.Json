@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -110,7 +109,7 @@ public static class JsonUtils {
     }
     var characterSet = content.Headers.GetContentEncoding();
     T? result;
-    if (characterSet.ToLowerInvariant() == "utf-8" && JsonUtils.ShowReceivedJson is null) {
+    if (characterSet == "utf-8" && JsonUtils.ShowReceivedJson is null) {
       // Directly use the stream
       result = await JsonUtils.DeserializeAsync<T>(stream, options, cancellationToken).ConfigureAwait(false);
     }
