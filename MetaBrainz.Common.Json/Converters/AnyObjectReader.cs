@@ -51,6 +51,7 @@ public sealed class AnyObjectReader : JsonReader<object> {
   /// <description>
   /// <para>If an integral value that fits in a 32-bit signed integer: <see cref="int"/>.</para>
   /// <para>If an integral value that fits in a 64-bit signed integer: <see cref="long"/>.</para>
+  /// <para>If an integral value that fits in a 64-bit unsigned integer: <see cref="ulong"/>.</para>
   /// <para>If a value that fits in a .NET decimal: <see cref="decimal"/>.</para>
   /// <para>Otherwise, if it can be represented as a 64-bit double-precision floating point value: <see cref="double"/>.</para>
   /// <para>Otherwise: <see cref="string"/>.</para>
