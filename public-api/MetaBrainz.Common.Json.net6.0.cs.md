@@ -41,15 +41,7 @@ public abstract class JsonBasedObject : IJsonBasedObject {
 ```cs
 public static class JsonUtils {
 
-  System.Action<System.Net.Http.Headers.HttpContentHeaders>? ShowReceivedHeaders {
-    public static get;
-    public static set;
-  }
-
-  System.Action<string>? ShowReceivedJson {
-    public static get;
-    public static set;
-  }
+  public static readonly System.Diagnostics.TraceSource TraceSource;
 
   bool WriteIndentedByDefault {
     public static get;

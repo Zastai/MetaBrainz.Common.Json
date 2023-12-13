@@ -1,10 +1,11 @@
+#define TRACE
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -102,27 +103,31 @@ public static class JsonUtils {
   public static async Task<T> GetJsonContentAsync<T>(HttpResponseMessage response, JsonSerializerOptions options,
                                                      CancellationToken cancellationToken = default) {
     var content = response.Content;
-    JsonUtils.ShowReceivedHeaders?.Invoke(content.Headers);
-    var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+    var headers = content.Headers;
+    JsonUtils.TraceSource.TraceEvent(TraceEventType.Verbose, 1, "RESPONSE ({0}): {1} bytes", headers.ContentType,
+                                     headers.ContentLength);
+    var stream = await content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
     await using var _ = stream.ConfigureAwait(false);
     if (stream is null || stream.Length == 0) {
       throw new JsonException("No content received.");
     }
-    var characterSet = content.Headers.GetContentEncoding();
+    var characterSet = headers.GetContentEncoding();
+    var tracingRequested = JsonUtils.TraceSource.Switch.ShouldTrace(TraceEventType.Verbose);
     T? result;
-    if (characterSet.ToLowerInvariant() == "utf-8" && JsonUtils.ShowReceivedJson is null) {
+    if (characterSet == "utf-8" && !tracingRequested) {
       // Directly use the stream
       result = await JsonUtils.DeserializeAsync<T>(stream, options, cancellationToken).ConfigureAwait(false);
     }
     else {
-      var enc = Encoding.GetEncoding(characterSet);
-      using var sr = new StreamReader(stream, enc, false, 1024, true);
+      using var sr = new StreamReader(stream, Encoding.GetEncoding(characterSet), false, 1024, true);
 #if NET6_0
       var json = await sr.ReadToEndAsync().ConfigureAwait(false);
 #else
       var json = await sr.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
 #endif
-      JsonUtils.ShowReceivedJson?.Invoke(json);
+      if (tracingRequested) {
+        JsonUtils.TraceSource.TraceEvent(TraceEventType.Verbose, 1, "JSON: {0}", JsonUtils.Prettify(json));
+      }
       result = JsonUtils.Deserialize<T>(json, options);
     }
     return result ?? throw new JsonException("The received content was null.");
@@ -142,21 +147,8 @@ public static class JsonUtils {
     }
   }
 
-  /// <summary>
-  /// The action to use to show received HTTP headers.<br/>
-  /// When set, the methods that process JSON response content will pass the response headers to this action.
-  /// </summary>
-  public static Action<HttpContentHeaders>? ShowReceivedHeaders { get; set; }
-
-  /// <summary>
-  /// The action to use to show received JSON.<br/>
-  /// When set, the methods that process JSON response content will pass it to this action before deserializing it.
-  /// </summary>
-  /// <remarks>
-  /// For a UTF-8 JSON response, the performance of the content processing will be better without this set (because then the
-  /// deserialization can use the raw UTF-8 bytes without needing to create a string first).
-  /// </remarks>
-  public static Action<string>? ShowReceivedJson { get; set; }
+  /// <summary>The trace source (named 'MetaBrainz.Common.Json.JsonUtils') used by this class.</summary>
+  public static readonly TraceSource TraceSource = new("MetaBrainz.Common.Json.JsonUtils", SourceLevels.Off);
 
   #endregion
 
