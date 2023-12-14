@@ -64,6 +64,10 @@ public static class JsonUtils {
 
   public static System.Text.Json.JsonSerializerOptions CreateWriterOptions(params System.Text.Json.Serialization.JsonConverter[] writers);
 
+  public static T? Deserialize<T>(System.IO.Stream json, System.Text.Json.JsonSerializerOptions options);
+
+  public static T? Deserialize<T>(System.IO.Stream json);
+
   public static T? Deserialize<T>(string json, System.Text.Json.JsonSerializerOptions options);
 
   public static T? Deserialize<T>(string json);
