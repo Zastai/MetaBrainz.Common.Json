@@ -29,6 +29,20 @@ public static class JsonUtils {
   /// <typeparam name="T">The type of object to deserialize.</typeparam>
   /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
   /// <remarks>The options used match those returned by <see cref="CreateReaderOptions()"/>.</remarks>
+  public static T? Deserialize<T>(Stream json) => JsonUtils.Deserialize<T>(json, JsonUtils.ReaderOptions);
+
+  /// <summary>Deserializes JSON to an object of the specified type.</summary>
+  /// <param name="json">The JSON to deserialize.</param>
+  /// <param name="options">The options to use for deserialization.</param>
+  /// <typeparam name="T">The type of object to deserialize.</typeparam>
+  /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
+  public static T? Deserialize<T>(Stream json, JsonSerializerOptions options) => JsonSerializer.Deserialize<T>(json, options);
+
+  /// <summary>Deserializes JSON to an object of the specified type, using default options.</summary>
+  /// <param name="json">The JSON to deserialize.</param>
+  /// <typeparam name="T">The type of object to deserialize.</typeparam>
+  /// <returns>A newly deserialized object of type <typeparamref name="T"/>.</returns>
+  /// <remarks>The options used match those returned by <see cref="CreateReaderOptions()"/>.</remarks>
   public static T? Deserialize<T>(string json) => JsonUtils.Deserialize<T>(json, JsonUtils.ReaderOptions);
 
   /// <summary>Deserializes JSON to an object of the specified type.</summary>
