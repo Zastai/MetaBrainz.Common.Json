@@ -28,9 +28,9 @@ JsonUtils.TraceSource.Switch.Level = SourceLevels.All;
 var mySwitch = new TraceSwitch("MyAppDebugSwitch", "All");
 JsonUtils.TraceSource.Switch = mySwitch;
 
-// By default, there is a default listener that writes trace events to
+// By default, there is a single listener that writes trace events to
 // the debug output (typically only seen in an IDE's debugger). You can
-// can add (and remove) listeners as desired.
+// add (and remove) listeners as desired.
 var listener = new ConsoleTraceListener {
   Name = "MyAppConsole",
   TraceOutputOptions = TraceOptions.DateTime | TraceOptions.ProcessId,
