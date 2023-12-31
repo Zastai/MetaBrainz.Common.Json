@@ -118,8 +118,6 @@ public static class JsonUtils {
                                                      CancellationToken cancellationToken = default) {
     var content = response.Content;
     var headers = content.Headers;
-    JsonUtils.TraceSource.TraceEvent(TraceEventType.Verbose, 1, "RESPONSE ({0}): {1} bytes", headers.ContentType,
-                                     headers.ContentLength);
     var stream = await content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
     await using var _ = stream.ConfigureAwait(false);
     if (stream is null || stream.Length == 0) {
@@ -140,7 +138,7 @@ public static class JsonUtils {
       var json = await sr.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
 #endif
       if (tracingRequested) {
-        JsonUtils.TraceSource.TraceEvent(TraceEventType.Verbose, 1, "JSON: {0}", JsonUtils.Prettify(json));
+        JsonUtils.TraceSource.TraceEvent(TraceEventType.Verbose, 1, "JSON CONTENT: {0}", JsonUtils.Prettify(json));
       }
       result = JsonUtils.Deserialize<T>(json, options);
     }
