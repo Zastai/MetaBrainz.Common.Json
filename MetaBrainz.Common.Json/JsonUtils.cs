@@ -132,11 +132,7 @@ public static class JsonUtils {
     }
     else {
       using var sr = new StreamReader(stream, Encoding.GetEncoding(characterSet), false, 1024, true);
-#if NET6_0
-      var json = await sr.ReadToEndAsync().ConfigureAwait(false);
-#else
       var json = await sr.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
-#endif
       if (tracingRequested) {
         JsonUtils.TraceSource.TraceEvent(TraceEventType.Verbose, 1, "JSON CONTENT: {0}", JsonUtils.Prettify(json));
       }
