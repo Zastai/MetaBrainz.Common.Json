@@ -64,10 +64,6 @@ public static class JsonUtils {
 
   public static System.Text.Json.JsonSerializerOptions CreateWriterOptions(params System.Text.Json.Serialization.JsonConverter[] writers);
 
-  public static T? Deserialize<T>(System.IO.Stream json, System.Text.Json.JsonSerializerOptions options);
-
-  public static T? Deserialize<T>(System.IO.Stream json);
-
   public static T? Deserialize<T>(string json, System.Text.Json.JsonSerializerOptions options);
 
   public static T? Deserialize<T>(string json);
@@ -75,10 +71,6 @@ public static class JsonUtils {
   public static System.Threading.Tasks.ValueTask<T> DeserializeAsync<T>(System.IO.Stream json, System.Text.Json.JsonSerializerOptions options, System.Threading.CancellationToken cancellationToken = default);
 
   public static System.Threading.Tasks.ValueTask<T> DeserializeAsync<T>(System.IO.Stream json, System.Threading.CancellationToken cancellationToken = default);
-
-  public static T GetJsonContent<T>(System.Net.Http.HttpResponseMessage response);
-
-  public static T GetJsonContent<T>(System.Net.Http.HttpResponseMessage response, System.Text.Json.JsonSerializerOptions options);
 
   public static System.Threading.Tasks.Task<T> GetJsonContentAsync<T>(System.Net.Http.HttpResponseMessage response, System.Text.Json.JsonSerializerOptions options, System.Threading.CancellationToken cancellationToken = default);
 
