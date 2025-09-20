@@ -182,6 +182,8 @@ public sealed class AnyObjectReader : JsonReader<object> {
 
   public AnyObjectReader();
 
+  public static object PerformRead(ref System.Text.Json.Utf8JsonReader reader, System.Text.Json.JsonSerializerOptions options, bool allowNullInArrays, bool allowNullAsPropertyValue);
+
   public override object Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options);
 
 }
@@ -257,6 +259,22 @@ public abstract class ObjectWriter<T> : JsonWriter<T> {
   public sealed override void Write(System.Text.Json.Utf8JsonWriter writer, T value, System.Text.Json.JsonSerializerOptions options);
 
   protected abstract void WriteObjectContents(System.Text.Json.Utf8JsonWriter writer, T value, System.Text.Json.JsonSerializerOptions options);
+
+}
+```
+
+### Type: OptionalObjectReader
+
+```cs
+public sealed class OptionalObjectReader : JsonReader<object?> {
+
+  public static readonly OptionalObjectReader Instance;
+
+  public OptionalObjectReader();
+
+  public static object? PerformRead(ref System.Text.Json.Utf8JsonReader reader, System.Text.Json.JsonSerializerOptions options, bool allowNullInArrays, bool allowNullAsPropertyValue);
+
+  public override object? Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options);
 
 }
 ```
