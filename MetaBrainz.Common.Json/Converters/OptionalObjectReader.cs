@@ -26,12 +26,12 @@ public sealed class OptionalObjectReader : JsonReader<object?> {
   /// Specifies whether <see langword="null"/> should be allowed as a property value anywhere in the returned object.
   /// </param>
   /// <returns>
-  ///   The object converted from JSON. The specific type depends on the JSON token; see the table below.
-  ///   <list type="table">
-  ///     <listheader>
-  ///       <term>JSON Token</term>
-  ///       <description>Mapped Object Type</description>
-  ///     </listheader>
+  /// The object converted from JSON. The specific type depends on the JSON token; see the table below.
+  /// <list type="table">
+  ///   <listheader>
+  ///     <term>JSON Token</term>
+  ///     <description>Mapped Object Type</description>
+  ///   </listheader>
   ///   <item>
   ///     <term><c>null</c></term>
   ///     <description>
@@ -66,7 +66,9 @@ public sealed class OptionalObjectReader : JsonReader<object?> {
   ///       <para>If an integral value that fits in a 64-bit signed integer: <see cref="long"/>.</para>
   ///       <para>If an integral value that fits in a 64-bit unsigned integer: <see cref="ulong"/>.</para>
   ///       <para>If a value that fits in a .NET decimal: <see cref="decimal"/>.</para>
-  ///       <para>Otherwise, if it can be represented as a 64-bit double-precision floating point value: <see cref="double"/>.</para>
+  ///       <para>
+  ///         Otherwise, if it can be represented as a 64-bit double-precision floating point value: <see cref="double"/>.
+  ///       </para>
   ///       <para>Otherwise: <see cref="string"/>.</para>
   ///     </description>
   ///   </item>
@@ -88,12 +90,12 @@ public sealed class OptionalObjectReader : JsonReader<object?> {
   ///       <see cref="Dictionary{TKey,TValue}"/>, with <see cref="string"/> as key and (nullable) <see cref="object"/> as value.
   ///     </description>
   ///   </item>
-  ///   </list>
+  /// </list>
   /// </returns>
   /// <remarks>
-  ///   Unfortunately, <see cref="Utf8JsonReader.TryGetDecimal"/> will happily truncate decimals, even when a double would have
-  ///   preserved more digits. The degenerate case (where the decimal would be 0) is detected, but in other cases the less precise
-  ///   decimal will be used.
+  /// Unfortunately, <see cref="Utf8JsonReader.TryGetDecimal"/> will happily truncate decimals, even when a <c>double</c> would have
+  /// preserved more digits. The degenerate case (where the <c>decimal</c> would be 0) is detected, but in other cases the less
+  /// precise <c>decimal</c> will be used.
   /// </remarks>
   public static object? Read(ref Utf8JsonReader reader, JsonSerializerOptions options, bool allowNullInArrays = true,
                              bool allowNullAsPropertyValue = true) => reader.TokenType switch {
@@ -106,12 +108,12 @@ public sealed class OptionalObjectReader : JsonReader<object?> {
   /// <param name="typeToConvert">The type of object to convert (ignored; assumed to be <see cref="object"/>).</param>
   /// <param name="options">The options to use for deserialization.</param>
   /// <returns>
-  ///   The object converted from JSON. The specific type depends on the JSON token; see the table below.
-  ///   <list type="table">
-  ///     <listheader>
-  ///       <term>JSON Token</term>
-  ///       <description>Mapped Object Type</description>
-  ///     </listheader>
+  /// The object converted from JSON. The specific type depends on the JSON token; see the table below.
+  /// <list type="table">
+  ///   <listheader>
+  ///     <term>JSON Token</term>
+  ///     <description>Mapped Object Type</description>
+  ///   </listheader>
   ///   <item>
   ///     <term><c>null</c></term>
   ///     <description>
@@ -145,7 +147,9 @@ public sealed class OptionalObjectReader : JsonReader<object?> {
   ///       <para>If an integral value that fits in a 64-bit signed integer: <see cref="long"/>.</para>
   ///       <para>If an integral value that fits in a 64-bit unsigned integer: <see cref="ulong"/>.</para>
   ///       <para>If a value that fits in a .NET decimal: <see cref="decimal"/>.</para>
-  ///       <para>Otherwise, if it can be represented as a 64-bit double-precision floating point value: <see cref="double"/>.</para>
+  ///       <para>
+  ///         Otherwise, if it can be represented as a 64-bit double-precision floating point value: <see cref="double"/>.
+  ///       </para>
   ///       <para>Otherwise: <see cref="string"/>.</para>
   ///     </description>
   ///   </item>
@@ -167,12 +171,12 @@ public sealed class OptionalObjectReader : JsonReader<object?> {
   ///       <see cref="Dictionary{TKey,TValue}"/>, with <see cref="string"/> as key and (nullable) <see cref="object"/> as value.
   ///     </description>
   ///   </item>
-  ///   </list>
+  /// </list>
   /// </returns>
   /// <remarks>
-  ///   Unfortunately, <see cref="Utf8JsonReader.TryGetDecimal"/> will happily truncate decimals, even when a double would have
-  ///   preserved more digits. The degenerate case (where the decimal would be 0) is detected, but in other cases the less precise
-  ///   decimal will be used.
+  /// Unfortunately, <see cref="Utf8JsonReader.TryGetDecimal"/> will happily truncate decimals, even when a <c>double</c> would have
+  /// preserved more digits. The degenerate case (where the <c>decimal</c> would be 0) is detected, but in other cases the less
+  /// precise <c>decimal</c> will be used.
   /// </remarks>
   public override object? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     => OptionalObjectReader.Read(ref reader, options);

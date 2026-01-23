@@ -1,21 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
 
-  <Sdk Name="MetaBrainz.Build.Sdk" Version="4.0.0" />
+  <Sdk Name="MetaBrainz.Build.Sdk" Version="4.1.1" />
 
   <PropertyGroup>
     <Authors>Zastai</Authors>
     <Title>Common JSON Utilities</Title>
     <Description>This package provides JSON-related utility classes used by other MetaBrainz packages.</Description>
     <PackageCopyrightOwners>Tim Van Holder</PackageCopyrightOwners>
-    <PackageCopyrightYears>2020, 2021, 2022, 2023, 2025</PackageCopyrightYears>
+    <PackageCopyrightYears>2020, 2021, 2022, 2023, 2025, 2026</PackageCopyrightYears>
     <PackageRepositoryName>MetaBrainz.Common.Json</PackageRepositoryName>
     <PackageTags>MetaBrainz JSON</PackageTags>
-    <Version>7.1.1-pre</Version>
+    <Version>7.2.0-pre</Version>
   </PropertyGroup>
 
   <PropertyGroup>
     <AssemblyIsComVisible>false</AssemblyIsComVisible>
+    <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
