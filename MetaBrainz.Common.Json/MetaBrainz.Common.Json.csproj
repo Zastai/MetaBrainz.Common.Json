@@ -8,7 +8,7 @@
     <Title>Common JSON Utilities</Title>
     <Description>This package provides JSON-related utility classes used by other MetaBrainz packages.</Description>
     <PackageCopyrightOwners>Tim Van Holder</PackageCopyrightOwners>
-    <PackageCopyrightYears>2020, 2021, 2022, 2023, 2025</PackageCopyrightYears>
+    <PackageCopyrightYears>2020, 2021, 2022, 2023, 2025, 2026</PackageCopyrightYears>
     <PackageRepositoryName>MetaBrainz.Common.Json</PackageRepositoryName>
     <PackageTags>MetaBrainz JSON</PackageTags>
     <Version>7.1.1-pre</Version>
