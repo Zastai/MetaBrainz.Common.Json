@@ -16,6 +16,7 @@
 
   <PropertyGroup>
     <AssemblyIsComVisible>false</AssemblyIsComVisible>
+    <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
