@@ -11,7 +11,7 @@
     <PackageCopyrightYears>2020, 2021, 2022, 2023, 2025, 2026</PackageCopyrightYears>
     <PackageRepositoryName>MetaBrainz.Common.Json</PackageRepositoryName>
     <PackageTags>MetaBrainz JSON</PackageTags>
-    <Version>7.1.1-pre</Version>
+    <Version>7.2.0-pre</Version>
   </PropertyGroup>
 
   <PropertyGroup>
